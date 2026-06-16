@@ -4,7 +4,7 @@ import plotly.express as px
 import numpy as np
 
 st.set_page_config(
-    page_title="Liga Mantri",
+    page_title="Racing Unit",
     page_icon="🏆",
     layout="wide"
 )
@@ -219,7 +219,7 @@ if "page" not in st.session_state:
     st.session_state.page = "Overview"
 
 with st.sidebar:
-    st.title("🏆 Liga Mantri")
+    st.title("🏆 Racing Unit")
     st.caption("Performance Dashboard")
     st.divider()
 
@@ -748,7 +748,7 @@ Unit: {top3_m['Unit']}
 st.markdown("---")
 st.markdown(
     "<div style='background:#00529C;color:white;padding:10px;border-radius:10px;text-align:center'>"
-    "<b>Liga Mantri Dashboard</b><br>"
+    "<b>Racing Unit Dashboard</b><br>"
     "Performance Monitoring & Leaderboard (Point-Based System)<br>"
     "<small>100 Point Scale: Realisasi (25) + Growth OS (25) + Growth Kupedes (15) + Quality (20) + Akuisisi (15)</small>"
     "</div>",
