@@ -46,107 +46,118 @@ div[data-testid="stMetric"]{
 """, unsafe_allow_html=True)
 
 # ==========================
-# FUNGSI PERHITUNGAN POIN
+# FUNGSI PERHITUNGAN POIN MANTRI
 # ==========================
 
-def get_realisasi_poin(realisasi_pct):
-    """Hitung poin berdasarkan persentase realisasi (Maks. 25 Poin)"""
+def get_mantri_realisasi_poin(realisasi_pct):
+    """Hitung poin Mantri berdasarkan realisasi (Maks. 50 Poin)"""
     if realisasi_pct >= 120:
-        return 25
+        return 50
     elif realisasi_pct >= 110:
-        return 22
+        return 45
     elif realisasi_pct >= 100:
-        return 19
-    elif realisasi_pct >= 95:
-        return 16
+        return 40
     elif realisasi_pct >= 90:
-        return 12
+        return 30
     else:
-        return 6
-
-def get_growth_os_poin(growth_pct):
-    """Hitung poin berdasarkan pertumbuhan Outstanding (Maks. 25 Poin)"""
-    if growth_pct >= 15:
-        return 25
-    elif growth_pct >= 12:
-        return 22
-    elif growth_pct >= 10:
-        return 19
-    elif growth_pct >= 7:
         return 15
-    elif growth_pct >= 5:
+
+def get_mantri_quality_poin(quality_value):
+    """Hitung poin Mantri berdasarkan perbaikan kualitas (Maks. 50 Poin)
+    quality_value: nilai dari -10 hingga 10+ yang merepresentasikan perubahan kualitas
+    """
+    if quality_value >= 8:
+        return 50
+    elif quality_value >= 5:
+        return 40
+    elif quality_value >= 2:
+        return 30
+    elif quality_value >= -2:
+        return 15
+    else:
+        return 0
+
+# ==========================
+# FUNGSI PERHITUNGAN POIN UNIT
+# ==========================
+
+def get_unit_growth_os_poin(growth_os_pct):
+    """Hitung poin Unit berdasarkan pertumbuhan OS (Maks. 40 Poin)"""
+    if growth_os_pct >= 15:
+        return 40
+    elif growth_os_pct >= 12:
+        return 34
+    elif growth_os_pct >= 10:
+        return 28
+    elif growth_os_pct >= 7:
+        return 20
+    else:
+        return 10
+
+def get_unit_quality_poin(quality_value):
+    """Hitung poin Unit berdasarkan perbaikan kualitas (Maks. 35 Poin)
+    quality_value: nilai dari -10 hingga 10+ yang merepresentasikan kondisi kualitas
+    """
+    if quality_value >= 8:
+        return 35
+    elif quality_value >= 5:
+        return 28
+    elif quality_value >= 2:
+        return 20
+    elif quality_value >= -2:
         return 10
     else:
-        return 5
+        return 0
 
-def get_growth_kupedes_poin(growth_kupedes_pct):
-    """Hitung poin berdasarkan pertumbuhan rasio Kupedes (Maks. 15 Poin)"""
-    if growth_kupedes_pct >= 15:
+def get_unit_kupedes_poin(growth_kupedes_pct):
+    """Hitung poin Unit berdasarkan growth rasio Kupedes (Maks. 25 Poin)"""
+    if growth_kupedes_pct >= 5:
+        return 25
+    elif growth_kupedes_pct >= 3:
+        return 20
+    elif growth_kupedes_pct >= 1:
         return 15
-    elif growth_kupedes_pct >= 12:
-        return 13
-    elif growth_kupedes_pct >= 10:
-        return 11
-    elif growth_kupedes_pct >= 7:
-        return 8
-    elif growth_kupedes_pct >= 5:
-        return 5
+    elif growth_kupedes_pct >= 0:
+        return 10
     else:
-        return 2
+        return 0
 
-def get_quality_poin(quality_type, value):
-    """
-    Hitung poin perbaikan kualitas (Maks. 20 Poin)
-    quality_type: 'improvement' atau 'sml'
-    """
-    if quality_type == 'improvement':
-        if value > 10:
-            return 20
-        elif value >= 5:
-            return 16
-        elif value == 0:
-            return 12
-        elif value < 0 and value >= -5:
-            return 8
-        else:
-            return 0
-    elif quality_type == 'sml':
-        if value == 0:  # Tidak ada SML baru
-            return 16
-        else:
-            return 0
-
-def get_akuisisi_poin(akuisisi_pct):
-    """Hitung poin berdasarkan akuisisi nasabah (Maks. 15 Poin)"""
-    if akuisisi_pct >= 120:
-        return 15
-    elif akuisisi_pct >= 110:
-        return 13
-    elif akuisisi_pct >= 100:
-        return 11
-    elif akuisisi_pct >= 90:
-        return 8
-    else:
-        return 4
-
-def get_category(total_poin):
-    """Tentukan kategori unit berdasarkan total poin"""
-    if total_poin >= 90:
+def get_unit_category(poin_unit):
+    """Tentukan kategori unit berdasarkan poin unit"""
+    if poin_unit >= 90:
         return "🏆 Elite Racing Unit"
-    elif total_poin >= 80:
+    elif poin_unit >= 80:
         return "🥇 Champion Racing Unit"
-    elif total_poin >= 70:
+    elif poin_unit >= 70:
         return "🥈 Prime Racing Unit"
-    elif total_poin >= 60:
+    elif poin_unit >= 60:
         return "🥉 Rising Racing Unit"
     else:
         return "📈 Growth Racing Unit"
 
 # ==========================
+# DATA PERFORMA MANTRI
+# ==========================
+
+mantri_data = pd.DataFrame({
+    "Nama": ["Andi", "Budi", "Citra", "Dedi", "Eko"],
+    "Unit": ["Purwokerto Timur", "Purwokerto Timur", "Sokaraja", "Ajibarang", "Cilongok"],
+    "Realisasi (%)": [118, 110, 105, 98, 92],
+    "Quality (%)": [9, 7, 6, 3, -1]
+})
+
+mantri_data["Poin Realisasi"] = mantri_data["Realisasi (%)"].apply(get_mantri_realisasi_poin)
+mantri_data["Poin Quality"] = mantri_data["Quality (%)"].apply(get_mantri_quality_poin)
+mantri_data["Total Poin"] = (
+    mantri_data["Poin Realisasi"] +
+    mantri_data["Poin Quality"]
+)
+mantri_data["Rank"] = mantri_data["Total Poin"].rank(method="min", ascending=False).astype(int)
+
+# ==========================
 # DATA PERFORMA UNIT
 # ==========================
 
-# Data dengan nilai aktual untuk perhitungan poin
 unit_data = pd.DataFrame({
     "Rank": [1, 2, 3, 4, 5],
     "Unit": [
@@ -156,61 +167,46 @@ unit_data = pd.DataFrame({
         "⭐ Unit Anda",
         "Cilongok"
     ],
-    "Realisasi (%)": [115, 105, 108, 98, 92],
     "Growth OS (%)": [14, 16, 13, 11, 8],
-    "Growth Kupedes (%)": [12, 10, 11, 9, 6],
-    "Quality Improvement (%)": [12, 8, 6, 4, -2],
-    "Akuisisi (%)": [125, 115, 105, 100, 85],
+    "Quality Unit (%)": [8, 7, 6, 4, -1],
+    "Growth Kupedes (%)": [4.5, 5.2, 3.8, 2.1, 0.5],
     "Rank Change": [2, 1, 3, 2, -1]
 })
 
-# Hitung poin untuk setiap unit
-unit_data["Poin Realisasi"] = unit_data["Realisasi (%)"].apply(get_realisasi_poin)
-unit_data["Poin Growth OS"] = unit_data["Growth OS (%)"].apply(get_growth_os_poin)
-unit_data["Poin Growth Kupedes"] = unit_data["Growth Kupedes (%)"].apply(get_growth_kupedes_poin)
-unit_data["Poin Quality"] = unit_data["Quality Improvement (%)"].apply(
-    lambda x: get_quality_poin('improvement', x)
-)
-unit_data["Poin Akuisisi"] = unit_data["Akuisisi (%)"].apply(get_akuisisi_poin)
-unit_data["Total Poin"] = (
-    unit_data["Poin Realisasi"] +
+# Hitung Rata-rata Poin Mantri per Unit
+unit_mantri_avg = mantri_data.groupby("Unit")["Total Poin"].mean().reset_index()
+unit_mantri_avg.columns = ["Unit", "Rata-rata Poin Mantri"]
+
+# Merge dengan unit_data
+unit_data = unit_data.merge(unit_mantri_avg, on="Unit", how="left")
+unit_data["Rata-rata Poin Mantri"] = unit_data["Rata-rata Poin Mantri"].fillna(0)
+
+# Hitung Poin Kinerja Unit
+unit_data["Poin Growth OS"] = unit_data["Growth OS (%)"].apply(get_unit_growth_os_poin)
+unit_data["Poin Quality Unit"] = unit_data["Quality Unit (%)"].apply(get_unit_quality_poin)
+unit_data["Poin Kupedes"] = unit_data["Growth Kupedes (%)"].apply(get_unit_kupedes_poin)
+
+# Total Poin Kinerja Unit (40 + 35 + 25 = 100)
+unit_data["Total Poin Kinerja"] = (
     unit_data["Poin Growth OS"] +
-    unit_data["Poin Growth Kupedes"] +
-    unit_data["Poin Quality"] +
-    unit_data["Poin Akuisisi"]
+    unit_data["Poin Quality Unit"] +
+    unit_data["Poin Kupedes"]
 )
-unit_data["Kategori"] = unit_data["Total Poin"].apply(get_category)
 
-# Sort berdasarkan total poin
-unit_data = unit_data.sort_values("Total Poin", ascending=False).reset_index(drop=True)
+# Normalisasi Poin Kinerja Unit ke skala 0-100
+unit_data["Poin Kinerja Normalized"] = (unit_data["Total Poin Kinerja"] / 100) * 100
+
+# Hitung Poin Unit: 70% Rata-rata Mantri + 30% Poin Kinerja Unit
+unit_data["Poin Unit"] = (
+    (unit_data["Rata-rata Poin Mantri"] / 100) * 70 +
+    (unit_data["Poin Kinerja Normalized"] / 100) * 30
+)
+
+unit_data["Kategori"] = unit_data["Poin Unit"].apply(get_unit_category)
+
+# Sort berdasarkan Poin Unit
+unit_data = unit_data.sort_values("Poin Unit", ascending=False).reset_index(drop=True)
 unit_data["Rank"] = range(1, len(unit_data) + 1)
-
-# Data untuk Mantri
-mantri_data = pd.DataFrame({
-    "Nama": ["Andi", "Budi", "Citra", "Dedi", "Eko"],
-    "Unit": ["Purwokerto Timur", "Purwokerto Timur", "Sokaraja", "Ajibarang", "Cilongok"],
-    "Realisasi (%)": [118, 110, 105, 98, 92],
-    "Growth OS (%)": [15, 13, 14, 10, 7],
-    "Growth Kupedes (%)": [13, 11, 12, 8, 5],
-    "Quality (%)": [14, 10, 8, 5, 2],
-    "Akuisisi (%)": [128, 120, 112, 98, 85]
-})
-
-mantri_data["Poin Realisasi"] = mantri_data["Realisasi (%)"].apply(get_realisasi_poin)
-mantri_data["Poin Growth OS"] = mantri_data["Growth OS (%)"].apply(get_growth_os_poin)
-mantri_data["Poin Growth Kupedes"] = mantri_data["Growth Kupedes (%)"].apply(get_growth_kupedes_poin)
-mantri_data["Poin Quality"] = mantri_data["Quality (%)"].apply(
-    lambda x: get_quality_poin('improvement', x)
-)
-mantri_data["Poin Akuisisi"] = mantri_data["Akuisisi (%)"].apply(get_akuisisi_poin)
-mantri_data["Total Poin"] = (
-    mantri_data["Poin Realisasi"] +
-    mantri_data["Poin Growth OS"] +
-    mantri_data["Poin Growth Kupedes"] +
-    mantri_data["Poin Quality"] +
-    mantri_data["Poin Akuisisi"]
-)
-mantri_data["Rank"] = range(1, len(mantri_data) + 1)
 
 # ==========================
 # NAVIGASI
@@ -267,39 +263,39 @@ if st.session_state.page == "Overview":
     with k1:
         st.metric("🏅 Ranking", f"#{int(unit_anda['Rank'])} / 23", f"+{int(unit_anda['Rank Change'])}")
     with k2:
-        st.metric("💯 Performance", f"{int(unit_anda['Total Poin'])} Poin", f"/ 100")
+        st.metric("💯 Performance", f"{unit_anda['Poin Unit']:.1f} Poin", f"/ 100")
     with k3:
-        st.metric("💰 Outstanding", "Rp18,2 G", f"+{unit_anda['Growth OS (%)']:.1f}%")
+        st.metric("💰 Growth OS", f"{unit_anda['Growth OS (%)']:.1f}%", f"({int(unit_anda['Poin Growth OS'])}/40)")
     with k4:
-        st.metric("🎯 Realisasi", f"{unit_anda['Realisasi (%)']:.1f}%")
+        st.metric("📊 Kualitas", f"{unit_anda['Quality Unit (%)']:.1f}%", f"({int(unit_anda['Poin Quality Unit'])}/35)")
     with k5:
         st.metric("📈 Kategori", unit_anda['Kategori'])
 
     st.divider()
 
-    # Section 1: Leaderboard Racing Unit vs Trend Ranking
+    # Section 1: Leaderboard Racing Unit vs Breakdown Poin
     c1, c2 = st.columns([2, 1])
 
     with c1:
-        st.subheader("🏅 Leaderboard Racing Unit (Berbasis Poin)")
+        st.subheader("🏅 Leaderboard Racing Unit (Berbasis Performance Point)")
         
-        leaderboard_display = unit_data[["Rank", "Unit", "Total Poin", "Kategori"]].copy()
+        leaderboard_display = unit_data[["Rank", "Unit", "Poin Unit", "Kategori"]].copy()
         leaderboard_display.columns = ["#", "Racing Unit", "Performance Poin", "Kategori"]
         leaderboard_display["#"] = leaderboard_display["#"].astype(int)
-        leaderboard_display["Performance Poin"] = leaderboard_display["Performance Poin"].astype(int)
+        leaderboard_display["Performance Poin"] = leaderboard_display["Performance Poin"].round(1)
         
         st.dataframe(leaderboard_display, use_container_width=True, hide_index=True)
         
         # Visualisasi bar chart
         fig = px.bar(
-            unit_data.sort_values("Total Poin"),
-            x="Total Poin",
+            unit_data.sort_values("Poin Unit"),
+            x="Poin Unit",
             y="Unit",
             orientation="h",
-            text="Total Poin",
+            text_auto=".1f",
             title="Total Performance Point per Racing Unit"
         )
-        fig.update_traces(marker_color="#00529C", text=[f"{int(x)}" for x in unit_data.sort_values("Total Poin")["Total Poin"]])
+        fig.update_traces(marker_color="#00529C")
         fig.update_layout(
             plot_bgcolor="white",
             paper_bgcolor="white",
@@ -312,15 +308,13 @@ if st.session_state.page == "Overview":
         st.subheader("📊 Breakdown Poin Unit Anda")
         
         breakdown = pd.DataFrame({
-            "Indikator": ["Realisasi", "Growth OS", "Growth Kupedes", "Quality", "Akuisisi"],
+            "Indikator": ["Growth OS", "Kualitas Unit", "Kupedes"],
             "Poin": [
-                int(unit_anda["Poin Realisasi"]),
                 int(unit_anda["Poin Growth OS"]),
-                int(unit_anda["Poin Growth Kupedes"]),
-                int(unit_anda["Poin Quality"]),
-                int(unit_anda["Poin Akuisisi"])
+                int(unit_anda["Poin Quality Unit"]),
+                int(unit_anda["Poin Kupedes"])
             ],
-            "Maksimal": [25, 25, 15, 20, 15]
+            "Maksimal": [40, 35, 25]
         })
         
         fig_breakdown = px.bar(
@@ -340,9 +334,9 @@ if st.session_state.page == "Overview":
         st.plotly_chart(fig_breakdown, use_container_width=True)
 
         st.info(f"""
-**Total: {int(unit_anda['Total Poin'])} / 100 Poin**
+**Total Poin Unit: {unit_anda['Poin Unit']:.1f} / 100**
 
-Target Top 3: +{int(max(0, 70 - unit_anda['Total Poin']))} poin
+Target Top 3: +{max(0, 70 - unit_anda['Poin Unit']):.1f} poin
         """)
 
     st.divider()
@@ -353,31 +347,36 @@ Target Top 3: +{int(max(0, 70 - unit_anda['Total Poin']))} poin
     with a:
         st.subheader("👨‍💼 Top Mantri di Unit Anda")
         
-        top_mantri = mantri_data.sort_values("Total Poin", ascending=False).head(3)
+        # Filter mantri dari unit anda
+        unit_anda_name = unit_anda["Unit"]
+        mantri_unit_anda = mantri_data[mantri_data["Unit"] == unit_anda_name].sort_values("Total Poin", ascending=False)
         
-        fig3 = px.bar(
-            top_mantri.sort_values("Total Poin"),
-            x="Total Poin",
-            y="Nama",
-            orientation="h",
-            text="Total Poin"
-        )
-        fig3.update_traces(marker_color="#F37021")
-        fig3.update_layout(
-            plot_bgcolor="white",
-            paper_bgcolor="white",
-            xaxis=dict(range=[0, 100])
-        )
-        st.plotly_chart(fig3, use_container_width=True)
+        if len(mantri_unit_anda) > 0:
+            fig3 = px.bar(
+                mantri_unit_anda.sort_values("Total Poin"),
+                x="Total Poin",
+                y="Nama",
+                orientation="h",
+                text="Total Poin"
+            )
+            fig3.update_traces(marker_color="#F37021")
+            fig3.update_layout(
+                plot_bgcolor="white",
+                paper_bgcolor="white",
+                xaxis=dict(range=[0, 100])
+            )
+            st.plotly_chart(fig3, use_container_width=True)
+        else:
+            st.info("Tidak ada data mantri untuk unit ini.")
 
     with b:
-        st.subheader("🔥 Top Performer")
+        st.subheader("🔥 Top Performer (Mantri)")
         top_mantri_sorted = mantri_data.sort_values("Total Poin", ascending=False)
         
         for idx, row in top_mantri_sorted.head(3).iterrows():
             medals = ["🥇", "🥈", "🥉"]
             st.metric(
-                f"{medals[idx]} {row['Nama']}",
+                f"{medals[min(idx, 2)]} {row['Nama']}",
                 f"{int(row['Total Poin'])} Poin",
                 f"({row['Unit']})"
             )
@@ -390,13 +389,12 @@ Target Top 3: +{int(max(0, 70 - unit_anda['Total Poin']))} poin
 
 - ✅ Unit Anda berada di peringkat {int(unit_anda['Rank'])} dari 23.
 - {'📈' if unit_anda['Rank Change'] > 0 else '📉'} Naik {abs(int(unit_anda['Rank Change']))} peringkat dibanding bulan lalu.
-- 🎯 Performance: {int(unit_anda['Total Poin'])} / 100 Poin ({unit_anda['Kategori']})
-- 🚀 Realisasi: {unit_anda['Realisasi (%)']:.1f}% ({int(unit_anda['Poin Realisasi'])}/25 Poin)
-- 💰 Growth OS: {unit_anda['Growth OS (%)']:.1f}% ({int(unit_anda['Poin Growth OS'])}/25 Poin)
-- 📊 Growth Kupedes: {unit_anda['Growth Kupedes (%)']:.1f}% ({int(unit_anda['Poin Growth Kupedes'])}/15 Poin)
-- 🛡️ Quality: +{unit_anda['Quality Improvement (%)']:.1f}% ({int(unit_anda['Poin Quality'])}/20 Poin)
-- 👥 Akuisisi: {unit_anda['Akuisisi (%)']:.1f}% ({int(unit_anda['Poin Akuisisi'])}/15 Poin)
-- 🏆 **Dibutuhkan {int(max(0, top_unit['Total Poin'] - unit_anda['Total Poin']))} poin lagi untuk masuk ranking 1.**
+- 🎯 Performance: {unit_anda['Poin Unit']:.1f} / 100 Poin ({unit_anda['Kategori']})
+- 💰 Growth OS: {unit_anda['Growth OS (%)']:.1f}% ({int(unit_anda['Poin Growth OS'])}/40 Poin)
+- 🛡️ Kualitas Unit: {unit_anda['Quality Unit (%)']:.1f}% ({int(unit_anda['Poin Quality Unit'])}/35 Poin)
+- 📊 Growth Kupedes: {unit_anda['Growth Kupedes (%)']:.1f}% ({int(unit_anda['Poin Kupedes'])}/25 Poin)
+- 👥 Rata-rata Poin Mantri: {unit_anda['Rata-rata Poin Mantri']:.1f} / 100
+- 🏆 **Dibutuhkan {max(0, top_unit['Poin Unit'] - unit_anda['Poin Unit']):.1f} poin lagi untuk masuk ranking 1.**
     """)
 
 # ==========================
@@ -407,39 +405,37 @@ elif st.session_state.page == "Leaderboard Racing Unit":
     st.header("🏅 Leaderboard Racing Unit - Berbasis Performance Point")
     
     display_df = unit_data[[
-        "Rank", "Unit", "Realisasi (%)", "Growth OS (%)", "Growth Kupedes (%)",
-        "Poin Realisasi", "Poin Growth OS", "Poin Growth Kupedes", "Poin Quality", 
-        "Poin Akuisisi", "Total Poin", "Kategori"
+        "Rank", "Unit", "Growth OS (%)", "Quality Unit (%)", "Growth Kupedes (%)",
+        "Poin Growth OS", "Poin Quality Unit", "Poin Kupedes",
+        "Rata-rata Poin Mantri", "Poin Unit", "Kategori"
     ]].copy()
     
     display_df["Rank"] = display_df["Rank"].astype(int)
-    display_df["Poin Realisasi"] = display_df["Poin Realisasi"].astype(int)
     display_df["Poin Growth OS"] = display_df["Poin Growth OS"].astype(int)
-    display_df["Poin Growth Kupedes"] = display_df["Poin Growth Kupedes"].astype(int)
-    display_df["Poin Quality"] = display_df["Poin Quality"].astype(int)
-    display_df["Poin Akuisisi"] = display_df["Poin Akuisisi"].astype(int)
-    display_df["Total Poin"] = display_df["Total Poin"].astype(int)
+    display_df["Poin Quality Unit"] = display_df["Poin Quality Unit"].astype(int)
+    display_df["Poin Kupedes"] = display_df["Poin Kupedes"].astype(int)
+    display_df["Rata-rata Poin Mantri"] = display_df["Rata-rata Poin Mantri"].round(1)
+    display_df["Poin Unit"] = display_df["Poin Unit"].round(1)
     
     display_df.columns = [
-        "#", "Racing Unit", "Realisasi %", "Growth OS %", "Growth Kupedes %",
-        "Poin Real.", "Poin OS", "Poin Kupedes", "Poin Quality", "Poin Akuisisi",
-        "Total Poin", "Kategori"
+        "#", "Racing Unit", "Growth OS %", "Kualitas %", "Growth Kupedes %",
+        "Poin OS", "Poin Kualitas", "Poin Kupedes",
+        "Avg Mantri Poin", "Total Poin Unit", "Kategori"
     ]
     
     st.dataframe(display_df, use_container_width=True, hide_index=True)
 
-    # Chart Total Poin
+    # Chart Total Poin Unit
     fig = px.bar(
-        unit_data.sort_values("Total Poin"),
-        x="Total Poin",
+        unit_data.sort_values("Poin Unit"),
+        x="Poin Unit",
         y="Unit",
         orientation="h",
-        text="Total Poin",
-        color="Total Poin",
+        text_auto=".1f",
+        color="Poin Unit",
         color_continuous_scale="Blues",
         title="Total Performance Point per Racing Unit"
     )
-    fig.update_traces(text=[f"{int(x)}" for x in unit_data.sort_values("Total Poin")["Total Poin"]])
     fig.update_layout(
         plot_bgcolor="white",
         paper_bgcolor="white",
@@ -450,18 +446,18 @@ elif st.session_state.page == "Leaderboard Racing Unit":
     st.plotly_chart(fig, use_container_width=True)
 
     # Breakdown chart
-    st.subheader("📊 Rincian Poin per Kategori")
+    st.subheader("📊 Rincian Komponen Poin Kinerja Unit")
     
     breakdown_all = unit_data[[
-        "Unit", "Poin Realisasi", "Poin Growth OS", "Poin Growth Kupedes", "Poin Quality", "Poin Akuisisi"
-    ]].sort_values("Poin Realisasi", ascending=True)
+        "Unit", "Poin Growth OS", "Poin Quality Unit", "Poin Kupedes"
+    ]].sort_values("Poin Growth OS", ascending=True)
     
     fig_breakdown = px.bar(
         breakdown_all,
-        x=["Poin Realisasi", "Poin Growth OS", "Poin Growth Kupedes", "Poin Quality", "Poin Akuisisi"],
+        x=["Poin Growth OS", "Poin Quality Unit", "Poin Kupedes"],
         y="Unit",
         orientation="h",
-        title="Breakdown Poin per Kategori Indikator",
+        title="Breakdown Komponen Poin Kinerja Unit (Growth OS + Kualitas + Kupedes)",
         barmode="stack"
     )
     fig_breakdown.update_layout(
@@ -471,6 +467,31 @@ elif st.session_state.page == "Leaderboard Racing Unit":
     )
     st.plotly_chart(fig_breakdown, use_container_width=True)
 
+    # Kontribusi Mantri vs Kinerja Unit
+    st.subheader("📈 Komposisi Poin Unit (70% Mantri + 30% Kinerja)")
+    
+    composition_data = unit_data[[
+        "Unit", "Rata-rata Poin Mantri", "Poin Kinerja Normalized"
+    ]].copy()
+    composition_data["Kontribusi Mantri (70%)"] = (composition_data["Rata-rata Poin Mantri"] / 100) * 70
+    composition_data["Kontribusi Kinerja (30%)"] = (composition_data["Poin Kinerja Normalized"] / 100) * 30
+    composition_data = composition_data[["Unit", "Kontribusi Mantri (70%)", "Kontribusi Kinerja (30%)"]].sort_values("Kontribusi Mantri (70%)")
+    
+    fig_comp = px.bar(
+        composition_data,
+        x=["Kontribusi Mantri (70%)", "Kontribusi Kinerja (30%)"],
+        y="Unit",
+        orientation="h",
+        barmode="stack",
+        title="Komposisi Poin Unit: Kontribusi Mantri vs Kinerja Unit"
+    )
+    fig_comp.update_layout(
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        height=500
+    )
+    st.plotly_chart(fig_comp, use_container_width=True)
+
 # ==========================
 # LEADERBOARD MANTRI
 # ==========================
@@ -479,9 +500,8 @@ elif st.session_state.page == "Leaderboard Mantri":
     st.header("👨‍💼 Leaderboard Mantri - Berbasis Performance Point")
 
     display_mantri = mantri_data[[
-        "Nama", "Unit", "Realisasi (%)", "Growth OS (%)", "Growth Kupedes (%)",
-        "Poin Realisasi", "Poin Growth OS", "Poin Growth Kupedes", "Poin Quality", 
-        "Poin Akuisisi", "Total Poin"
+        "Nama", "Unit", "Realisasi (%)", "Quality (%)",
+        "Poin Realisasi", "Poin Quality", "Total Poin"
     ]].copy()
     
     display_mantri = display_mantri.sort_values("Total Poin", ascending=False)
@@ -489,20 +509,17 @@ elif st.session_state.page == "Leaderboard Mantri":
     
     display_mantri["Rank"] = display_mantri["Rank"].astype(int)
     display_mantri["Poin Realisasi"] = display_mantri["Poin Realisasi"].astype(int)
-    display_mantri["Poin Growth OS"] = display_mantri["Poin Growth OS"].astype(int)
-    display_mantri["Poin Growth Kupedes"] = display_mantri["Poin Growth Kupedes"].astype(int)
     display_mantri["Poin Quality"] = display_mantri["Poin Quality"].astype(int)
-    display_mantri["Poin Akuisisi"] = display_mantri["Poin Akuisisi"].astype(int)
     display_mantri["Total Poin"] = display_mantri["Total Poin"].astype(int)
     
     display_mantri.columns = [
-        "#", "Nama", "Unit", "Realisasi %", "Growth OS %", "Growth Kupedes %",
-        "Poin Real.", "Poin OS", "Poin Kupedes", "Poin Quality", "Poin Akuisisi", "Total Poin"
+        "#", "Nama", "Unit", "Realisasi %", "Quality %",
+        "Poin Realisasi", "Poin Quality", "Total Poin"
     ]
     
     st.dataframe(display_mantri, use_container_width=True, hide_index=True)
 
-    # Chart
+    # Chart Total Poin Mantri
     mantri_sorted = mantri_data.sort_values("Total Poin")
     fig = px.bar(
         mantri_sorted,
@@ -524,6 +541,28 @@ elif st.session_state.page == "Leaderboard Mantri":
     )
     st.plotly_chart(fig, use_container_width=True)
 
+    # Breakdown Mantri
+    st.subheader("📊 Breakdown Poin per Mantri")
+    
+    breakdown_mantri = mantri_data[[
+        "Nama", "Poin Realisasi", "Poin Quality"
+    ]].sort_values("Poin Realisasi")
+    
+    fig_breakdown_mantri = px.bar(
+        breakdown_mantri,
+        x=["Poin Realisasi", "Poin Quality"],
+        y="Nama",
+        orientation="h",
+        barmode="stack",
+        title="Breakdown Poin Mantri: Realisasi + Kualitas"
+    )
+    fig_breakdown_mantri.update_layout(
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        height=400
+    )
+    st.plotly_chart(fig_breakdown_mantri, use_container_width=True)
+
 # ==========================
 # BREAKDOWN POIN
 # ==========================
@@ -531,109 +570,173 @@ elif st.session_state.page == "Breakdown Poin":
 
     st.header("📊 Breakdown Poin - Rincian Perhitungan")
     
-    tab1, tab2 = st.tabs(["📋 Tabel Penilaian", "🧮 Kalkulasi Detail"])
+    tab1, tab2, tab3 = st.tabs(["📋 Tabel Penilaian Mantri", "📊 Tabel Penilaian Unit", "🧮 Kalkulasi Detail"])
     
     with tab1:
-        st.subheader("🚀 Realisasi Keseluruhan (Maks. 25 Poin)")
+        st.subheader("👨‍💼 Penilaian Mantri (Total 100 Poin)")
+        
+        st.markdown("### 1. Realisasi Keseluruhan (50 Poin)")
         realisasi_table = pd.DataFrame({
-            "Pencapaian": ["≥ 120%", "110% – 119,99%", "100% – 109,99%", "95% – 99,99%", "90% – 94,99%", "< 90%"],
-            "Poin": [25, 22, 19, 16, 12, 6]
+            "Achievement Realisasi": ["≥ 120%", "110% – 119,99%", "100% – 109,99%", "90% – 99,99%", "< 90%"],
+            "Poin": [50, 45, 40, 30, 15]
         })
         st.dataframe(realisasi_table, use_container_width=True, hide_index=True)
 
-        st.subheader("💰 Pertumbuhan Outstanding (Maks. 25 Poin)")
-        growth_table = pd.DataFrame({
-            "Growth OS": ["≥ 15%", "12% – 14,99%", "10% – 11,99%", "7% – 9,99%", "5% – 6,99%", "< 5%"],
-            "Poin": [25, 22, 19, 15, 10, 5]
-        })
-        st.dataframe(growth_table, use_container_width=True, hide_index=True)
-
-        st.subheader("📊 Pertumbuhan Rasio Kupedes (Maks. 15 Poin)")
-        kupedes_table = pd.DataFrame({
-            "Growth Kupedes": ["≥ 15%", "12% – 14,99%", "10% – 11,99%", "7% – 9,99%", "5% – 6,99%", "< 5%"],
-            "Poin": [15, 13, 11, 8, 5, 2]
-        })
-        st.dataframe(kupedes_table, use_container_width=True, hide_index=True)
-
-        st.subheader("🛡️ Perbaikan Kualitas Portofolio (Maks. 20 Poin)")
+        st.markdown("### 2. Perbaikan Kualitas Portofolio (50 Poin)")
         quality_table = pd.DataFrame({
-            "Perbaikan Kualitas": [
-                "Sangat Baik (perbaikan > 10%)",
-                "Baik (5% – 10%)",
-                "Stabil (0%)",
-                "Sedikit Menurun (-5% – 0%)",
-                "Memburuk (< -5%)"
-            ],
-            "Poin": [20, 16, 12, 8, 0]
+            "Kondisi": ["Sangat Baik (≥ 8%)", "Baik (5% – 7,99%)", "Stabil (2% – 4,99%)", "Sedikit Memburuk (-2% – 1,99%)", "Memburuk (< -2%)"],
+            "Poin": [50, 40, 30, 15, 0]
         })
         st.dataframe(quality_table, use_container_width=True, hide_index=True)
 
-        st.subheader("👥 Akuisisi Nasabah Baru (Maks. 15 Poin)")
-        akuisisi_table = pd.DataFrame({
-            "Achievement Akuisisi": ["≥ 120%", "110% – 119,99%", "100% – 109,99%", "90% – 99,99%", "< 90%"],
-            "Poin": [15, 13, 11, 8, 4]
-        })
-        st.dataframe(akuisisi_table, use_container_width=True, hide_index=True)
-
-        st.subheader("📊 Total Performance Point")
-        total_table = pd.DataFrame({
-            "Indikator": ["🚀 Realisasi Keseluruhan", "💰 Pertumbuhan OS", "📊 Pertumbuhan Rasio Kupedes", "🛡️ Perbaikan Kualitas Portofolio", "👥 Akuisisi Nasabah Baru"],
-            "Maksimum Poin": [25, 25, 15, 20, 15],
+        st.markdown("### 📊 Total Poin Mantri")
+        total_mantri_table = pd.DataFrame({
+            "Indikator": ["🚀 Realisasi Keseluruhan", "🛡️ Perbaikan Kualitas Portofolio"],
+            "Maksimum Poin": [50, 50],
             "Tujuan": [
-                "Menjaga pencapaian target bisnis secara umum.",
-                "Mendorong pertumbuhan portofolio yang berkelanjutan.",
-                "Meningkatkan kontribusi Kupedes terhadap total portofolio.",
-                "Menjaga dan memperbaiki kualitas kredit serta mengendalikan SML/NPL.",
-                "Memperluas basis nasabah dan menciptakan sumber pertumbuhan baru."
+                "Mendorong pencapaian target bisnis secara optimal.",
+                "Mendorong pengelolaan kredit yang sehat dan meminimalkan pembentukan kredit bermasalah."
             ]
         })
-        total_row = pd.DataFrame({
+        total_row_m = pd.DataFrame({
             "Indikator": ["TOTAL"],
             "Maksimum Poin": [100],
             "Tujuan": [""]
         })
-        st.dataframe(pd.concat([total_table, total_row], ignore_index=True), use_container_width=True, hide_index=True)
+        st.dataframe(pd.concat([total_mantri_table, total_row_m], ignore_index=True), use_container_width=True, hide_index=True)
 
-        st.divider()
-        st.subheader("🏆 Kategori Racing Unit Berdasarkan Poin")
+    with tab2:
+        st.subheader("🏢 Penilaian Unit (Poin Kinerja Unit = 100 Poin)")
+        
+        st.markdown("### Komponen Poin Kinerja Unit")
+        
+        st.markdown("#### 1. Pertumbuhan Outstanding (OS) Unit (40 Poin)")
+        os_table = pd.DataFrame({
+            "Growth OS Unit": ["≥ 15%", "12% – 14,99%", "10% – 11,99%", "7% – 9,99%", "< 7%"],
+            "Poin": [40, 34, 28, 20, 10]
+        })
+        st.dataframe(os_table, use_container_width=True, hide_index=True)
+
+        st.markdown("#### 2. Perbaikan Kualitas Unit (35 Poin)")
+        unit_quality_table = pd.DataFrame({
+            "Kondisi Kualitas": ["Sangat Baik (≥ 8%)", "Baik (5% – 7,99%)", "Stabil (2% – 4,99%)", "Sedikit Memburuk (-2% – 1,99%)", "Memburuk (< -2%)"],
+            "Poin": [35, 28, 20, 10, 0]
+        })
+        st.dataframe(unit_quality_table, use_container_width=True, hide_index=True)
+
+        st.markdown("#### 3. Growth Rasio Kupedes (25 Poin)")
+        kupedes_table = pd.DataFrame({
+            "Growth Rasio Kupedes": ["≥ 5%", "3% – 4,99%", "1% – 2,99%", "0% – 0,99%", "Negatif"],
+            "Poin": [25, 20, 15, 10, 0]
+        })
+        st.dataframe(kupedes_table, use_container_width=True, hide_index=True)
+
+        st.markdown("### 📊 Total Poin Kinerja Unit")
+        total_unit_table = pd.DataFrame({
+            "Indikator": ["📈 Pertumbuhan Outstanding (OS)", "🛡️ Perbaikan Kualitas Unit", "📊 Growth Rasio Kupedes"],
+            "Maksimum Poin": [40, 35, 25],
+            "Tujuan": [
+                "Mendorong pertumbuhan portofolio unit.",
+                "Menjaga dan memperbaiki kualitas klaster unit.",
+                "Meningkatkan kontribusi portofolio Kupedes terhadap total portofolio mikro."
+            ]
+        })
+        total_row_u = pd.DataFrame({
+            "Indikator": ["TOTAL KINERJA UNIT"],
+            "Maksimum Poin": [100],
+            "Tujuan": [""]
+        })
+        st.dataframe(pd.concat([total_unit_table, total_row_u], ignore_index=True), use_container_width=True, hide_index=True)
+
+        st.markdown("### 🏆 Formula Poin Unit")
+        st.info("""
+**Poin Unit = (70% × Rata-rata Poin Mantri) + (30% × Poin Kinerja Unit)**
+
+- **70% Rata-rata Poin Mantri**: Kontribusi performa individual Mantri dalam unit
+- **30% Poin Kinerja Unit**: Kontribusi kinerja unit secara kolektif (Growth OS + Kualitas + Kupedes)
+        """)
+
+        st.markdown("### 🏆 Kategori Racing Unit Berdasarkan Poin Unit")
         category_table = pd.DataFrame({
-            "Total Poin": ["≥ 90", "80 – 89", "70 – 79", "60 – 69", "< 60"],
+            "Total Poin Unit": ["≥ 90", "80 – 89", "70 – 79", "60 – 69", "< 60"],
             "Kategori": ["🏆 Elite Racing Unit", "🥇 Champion Racing Unit", "🥈 Prime Racing Unit", "🥉 Rising Racing Unit", "📈 Growth Racing Unit"]
         })
         st.dataframe(category_table, use_container_width=True, hide_index=True)
 
-    with tab2:
+    with tab3:
         st.subheader("🧮 Kalkulasi Detail Unit Anda")
         
         unit_anda = unit_data[unit_data["Unit"] == "⭐ Unit Anda"].iloc[0]
         
-        col1, col2 = st.columns(2)
+        # Kalkulasi Mantri
+        st.markdown("### 📊 Kontribusi Mantri Unit Anda (70%)")
         
-        with col1:
-            st.metric("🚀 Realisasi", f"{unit_anda['Realisasi (%)']:.1f}%")
-            st.caption(f"Poin: **{int(unit_anda['Poin Realisasi'])} / 25**")
-            
-            st.metric("💰 Growth OS", f"{unit_anda['Growth OS (%)']:.1f}%")
-            st.caption(f"Poin: **{int(unit_anda['Poin Growth OS'])} / 25**")
-            
-            st.metric("📊 Growth Kupedes", f"{unit_anda['Growth Kupedes (%)']:.1f}%")
-            st.caption(f"Poin: **{int(unit_anda['Poin Growth Kupedes'])} / 15**")
+        unit_anda_name = unit_anda["Unit"]
+        mantri_unit_anda = mantri_data[mantri_data["Unit"] == unit_anda_name]
         
-        with col2:
-            st.metric("🛡️ Quality", f"+{unit_anda['Quality Improvement (%)']:.1f}%")
-            st.caption(f"Poin: **{int(unit_anda['Poin Quality'])} / 20**")
+        if len(mantri_unit_anda) > 0:
+            col1, col2 = st.columns(2)
             
-            st.metric("👥 Akuisisi", f"{unit_anda['Akuisisi (%)']:.1f}%")
-            st.caption(f"Poin: **{int(unit_anda['Poin Akuisisi'])} / 15**")
+            with col1:
+                for idx, row in mantri_unit_anda.iterrows():
+                    st.markdown(f"**{row['Nama']}**")
+                    st.caption(f"Realisasi: {row['Realisasi (%)']:.1f}% → {int(row['Poin Realisasi'])}/50 poin")
+                    st.caption(f"Kualitas: {row['Quality (%)']:.1f}% → {int(row['Poin Quality'])}/50 poin")
+                    st.metric("Total", f"{int(row['Total Poin'])} poin")
+                    st.divider()
+            
+            with col2:
+                st.info(f"""
+**Rata-rata Poin Mantri: {unit_anda['Rata-rata Poin Mantri']:.1f} / 100**
+
+Kontribusi ke Poin Unit:
+{unit_anda['Rata-rata Poin Mantri']:.1f} × 70% = **{(unit_anda['Rata-rata Poin Mantri'] / 100) * 70:.1f}**
+                """)
         
         st.divider()
         
+        # Kalkulasi Kinerja Unit
+        st.markdown("### 📈 Komponen Kinerja Unit Anda (30%)")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.metric("Growth OS", f"{unit_anda['Growth OS (%)']:.1f}%")
+            st.caption(f"Poin: **{int(unit_anda['Poin Growth OS'])} / 40**")
+            
+            st.metric("Kualitas Unit", f"{unit_anda['Quality Unit (%)']:.1f}%")
+            st.caption(f"Poin: **{int(unit_anda['Poin Quality Unit'])} / 35**")
+            
+            st.metric("Growth Kupedes", f"{unit_anda['Growth Kupedes (%)']:.1f}%")
+            st.caption(f"Poin: **{int(unit_anda['Poin Kupedes'])} / 25**")
+        
+        with col2:
+            st.info(f"""
+**Total Poin Kinerja: {int(unit_anda['Total Poin Kinerja'])} / 100**
+
+Normalized: {unit_anda['Poin Kinerja Normalized']:.1f}
+
+Kontribusi ke Poin Unit:
+{unit_anda['Poin Kinerja Normalized']:.1f} × 30% = **{(unit_anda['Poin Kinerja Normalized'] / 100) * 30:.1f}**
+            """)
+        
+        st.divider()
+        
+        # Total Poin Unit
+        st.markdown("### 🏆 Total Poin Unit Anda")
+        
+        kontribusi_mantri = (unit_anda['Rata-rata Poin Mantri'] / 100) * 70
+        kontribusi_kinerja = (unit_anda['Poin Kinerja Normalized'] / 100) * 30
+        
         st.success(f"""
-**Total Performance Point Unit Anda:**
+**Kalkulasi:**
 
-{int(unit_anda['Poin Realisasi'])} + {int(unit_anda['Poin Growth OS'])} + {int(unit_anda['Poin Growth Kupedes'])} + {int(unit_anda['Poin Quality'])} + {int(unit_anda['Poin Akuisisi'])} = **{int(unit_anda['Total Poin'])} / 100 Poin**
+({unit_anda['Rata-rata Poin Mantri']:.1f} ÷ 100) × 70 = {kontribusi_mantri:.1f}
++ ({unit_anda['Poin Kinerja Normalized']:.1f} ÷ 100) × 30 = {kontribusi_kinerja:.1f}
 
-Kategori: **{unit_anda['Kategori']}**
+**= {unit_anda['Poin Unit']:.1f} / 100 Poin**
+
+**Kategori: {unit_anda['Kategori']}**
         """)
 
 # ==========================
@@ -646,9 +749,9 @@ elif st.session_state.page == "Top Performer":
     # Top Racing Unit
     st.subheader("🏆 Top Racing Unit")
     
-    top_unit_display = unit_data.head(3)[["Rank", "Unit", "Total Poin", "Kategori"]].copy()
+    top_unit_display = unit_data.head(3)[["Rank", "Unit", "Poin Unit", "Kategori"]].copy()
     top_unit_display["Rank"] = top_unit_display["Rank"].astype(int)
-    top_unit_display["Total Poin"] = top_unit_display["Total Poin"].astype(int)
+    top_unit_display["Poin Unit"] = top_unit_display["Poin Unit"].round(1)
     top_unit_display.columns = ["#", "Racing Unit", "Performance Poin", "Kategori"]
     
     st.dataframe(top_unit_display, use_container_width=True, hide_index=True)
@@ -664,7 +767,7 @@ elif st.session_state.page == "Top Performer":
 
 {top1['Unit']}
 
-**{int(top1['Total Poin'])} / 100 Poin**
+**{top1['Poin Unit']:.1f} / 100 Poin**
 
 {top1['Kategori']}
         """)
@@ -676,7 +779,7 @@ elif st.session_state.page == "Top Performer":
 
 {top2['Unit']}
 
-**{int(top2['Total Poin'])} / 100 Poin**
+**{top2['Poin Unit']:.1f} / 100 Poin**
 
 {top2['Kategori']}
         """)
@@ -688,7 +791,7 @@ elif st.session_state.page == "Top Performer":
 
 {top3['Unit']}
 
-**{int(top3['Total Poin'])} / 100 Poin**
+**{top3['Poin Unit']:.1f} / 100 Poin**
 
 {top3['Kategori']}
         """)
@@ -750,7 +853,7 @@ st.markdown(
     "<div style='background:#00529C;color:white;padding:10px;border-radius:10px;text-align:center'>"
     "<b>Racing Unit Dashboard</b><br>"
     "Performance Monitoring & Leaderboard (Point-Based System)<br>"
-    "<small>100 Point Scale: Realisasi (25) + Growth OS (25) + Growth Kupedes (15) + Quality (20) + Akuisisi (15)</small>"
+    "<small>Mantri: Realisasi (50) + Kualitas (50) | Unit: (70% Mantri) + (30% Kinerja Unit: OS 40 + Kualitas 35 + Kupedes 25)</small>"
     "</div>",
     unsafe_allow_html=True
 )
