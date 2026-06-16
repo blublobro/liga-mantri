@@ -61,7 +61,6 @@ with st.sidebar:
         ("🏅 Leaderboard Unit","Leaderboard Unit"),
         ("👨‍💼 Leaderboard Mantri","Leaderboard Mantri"),
         ("📈 Kontribusi Unit","Kontribusi Unit"),
-        ("🎯 Achievement","Achievement"),
         ("🔥 Top Performer","Top Performer"),
     ]
 
@@ -97,7 +96,6 @@ if st.session_state.page == "Overview":
     k2.metric("📈 Growth","+18.5%")
     k3.metric("💰 Outstanding","Rp18,2 M")
     k4.metric("🟢 Quality","98.4%")
-    k5.metric("🎯 Achievement","105.2%")
 
     leaderboard = pd.DataFrame({
         "Unit":["Purwokerto Timur","Sokaraja","Ajibarang","⭐ Unit Anda","Cilongok"],
@@ -221,22 +219,6 @@ elif st.session_state.page == "Kontribusi Unit":
     fig.update_traces(marker=dict(colors=["#00529C","#1E88E5","#64B5F6","#90CAF9","#F37021"]))
     st.plotly_chart(fig,use_container_width=True)
 
-elif st.session_state.page == "Achievement":
-
-    st.header("🎯 Achievement Tracker")
-
-    ach = pd.DataFrame({
-        "Indikator":["Booking","Outstanding","CASA","Collection","Quality"],
-        "Achievement":[105,98,94,102,99]
-    })
-
-    st.dataframe(ach,use_container_width=True,hide_index=True)
-
-    fig = px.bar(ach,x="Indikator",y="Achievement",text="Achievement")
-    fig.update_traces(marker_color="#00529C")
-    st.plotly_chart(fig,use_container_width=True)
-
-    st.progress(87)
 
 elif st.session_state.page == "Top Performer":
 
