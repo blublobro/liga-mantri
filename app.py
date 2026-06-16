@@ -140,10 +140,10 @@ def get_unit_category(poin_unit):
 # ==========================
 
 mantri_data = pd.DataFrame({
-    "Nama": ["Andi", "Budi", "Citra", "Dedi", "Eko"],
-    "Unit": ["Purwokerto Timur", "Purwokerto Timur", "Sokaraja", "Ajibarang", "Cilongok"],
-    "Realisasi (%)": [118, 110, 105, 98, 92],
-    "Quality (%)": [9, 7, 6, 3, -1]
+    "Nama": ["Andi", "Budi", "Citra", "Dedi", "Eko", "Fitra", "Gita", "Hendra"],
+    "Unit": ["Purwokerto Timur", "Purwokerto Timur", "Sokaraja", "Ajibarang", "Cilongok", "⭐ Unit Anda", "⭐ Unit Anda", "⭐ Unit Anda"],
+    "Realisasi (%)": [118, 110, 105, 98, 92, 115, 108, 100],
+    "Quality (%)": [9, 7, 6, 3, -1, 8, 5, 2]
 })
 
 mantri_data["Poin Realisasi"] = mantri_data["Realisasi (%)"].apply(get_mantri_realisasi_poin)
