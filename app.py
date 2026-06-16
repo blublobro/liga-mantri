@@ -244,7 +244,7 @@ with st.sidebar:
 h1, h2 = st.columns([5, 1])
 with h1:
     st.markdown(
-        "<h1 style='color:#00529C;margin-bottom:0'>Liga <span style='color:#F37021'>Mantri</span></h1>"
+        "<h1 style='color:#00529C;margin-bottom:0'>Racing <span style='color:#F37021'>Unit</span></h1>"
         "<p style='color:gray'>Performance & Leaderboard Dashboard | Point-Based System</p>",
         unsafe_allow_html=True
     )
