@@ -65,14 +65,15 @@ def get_mantri_realisasi_poin(realisasi_pct):
 def get_mantri_quality_poin(quality_value):
     """Hitung poin Mantri berdasarkan perbaikan kualitas (Maks. 50 Poin)
     quality_value: nilai dari -10 hingga 10+ yang merepresentasikan perubahan kualitas
+    Skala terbalik: nilai negatif/kecil = poin lebih tinggi, nilai positif/besar = poin lebih rendah
     """
-    if quality_value >= 8:
+    if quality_value <= -8:
         return 50
-    elif quality_value >= 5:
+    elif quality_value <= -5:
         return 40
-    elif quality_value >= 2:
+    elif quality_value <= -2:
         return 30
-    elif quality_value >= -2:
+    elif quality_value <= 2:
         return 15
     else:
         return 0
@@ -110,7 +111,7 @@ def get_unit_quality_poin(quality_value):
         return 0
 
 def get_unit_kupedes_poin(growth_kupedes_pct):
-    """Hitung poin Unit berdasarkan growth rasio Kupedes (Maks. 25 Poin)"""
+    """Hitung poin Unit berdasarkan growth Kupedes (Maks. 25 Poin)"""
     if growth_kupedes_pct >= 5:
         return 25
     elif growth_kupedes_pct >= 3:
@@ -584,7 +585,7 @@ elif st.session_state.page == "Breakdown Poin":
 
         st.markdown("### 2. Perbaikan Kualitas Portofolio (50 Poin)")
         quality_table = pd.DataFrame({
-            "Kondisi": ["Sangat Baik (≥ 8%)", "Baik (5% – 7,99%)", "Stabil (2% – 4,99%)", "Sedikit Memburuk (-2% – 1,99%)", "Memburuk (< -2%)"],
+            "Kondisi": ["Sangat Baik (≤ -8%)", "Baik (≤ -5%)", "Stabil (≤ -2%)", "Sedikit Memburuk (≤ 2%)", "Memburuk (> 2%)"],
             "Poin": [50, 40, 30, 15, 0]
         })
         st.dataframe(quality_table, use_container_width=True, hide_index=True)
@@ -624,16 +625,16 @@ elif st.session_state.page == "Breakdown Poin":
         })
         st.dataframe(unit_quality_table, use_container_width=True, hide_index=True)
 
-        st.markdown("#### 3. Growth Rasio Kupedes (25 Poin)")
+        st.markdown("#### 3. Growth Kupedes (25 Poin)")
         kupedes_table = pd.DataFrame({
-            "Growth Rasio Kupedes": ["≥ 5%", "3% – 4,99%", "1% – 2,99%", "0% – 0,99%", "Negatif"],
+            "Growth Kupedes": ["≥ 5%", "3% – 4,99%", "1% – 2,99%", "0% – 0,99%", "Negatif"],
             "Poin": [25, 20, 15, 10, 0]
         })
         st.dataframe(kupedes_table, use_container_width=True, hide_index=True)
 
         st.markdown("### 📊 Total Poin Kinerja Unit")
         total_unit_table = pd.DataFrame({
-            "Indikator": ["📈 Pertumbuhan Outstanding (OS)", "🛡️ Perbaikan Kualitas Unit", "📊 Growth Rasio Kupedes"],
+            "Indikator": ["📈 Pertumbuhan Outstanding (OS)", "🛡️ Perbaikan Kualitas Unit", "📊 Growth Kupedes"],
             "Maksimum Poin": [40, 35, 25],
             "Tujuan": [
                 "Mendorong pertumbuhan portofolio unit.",
