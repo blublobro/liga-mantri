@@ -143,14 +143,40 @@ def get_unit_category(poin_unit):
         return "📈 Growth Racing Unit"
 
 # ==========================
-# DATA PERFORMA MANTRI
+# DATA PERFORMA MANTRI (DUMMY - mencakup mantri dari 15 unit)
 # ==========================
 
 mantri_data = pd.DataFrame({
-    "Nama": ["Andi", "Budi", "Citra", "Dedi", "Eko", "Fitra", "Gita", "Hendra"],
-    "Unit": ["Purwokerto Timur", "Purwokerto Timur", "Sokaraja", "Ajibarang", "Cilongok", "⭐ Unit Anda", "⭐ Unit Anda", "⭐ Unit Anda"],
-    "Net Disburs (Juta)": [950, 820, 760, 880, 650, 1050, 720, 510],
-    "MOB": [0.8, 1.2, 0.7, 0.5, 1.5, 0.9, 1.8, 2.1],
+    "Nama": [
+        "Andi", "Budi", "Citra", "Dedi", "Eko", "Fitra", "Gita", "Hendra",
+        "Indra", "Joko", "Kiki", "Lina", "Made", "Nanda", "Oscar", "Putri",
+        "Rama", "Sari", "Tono", "Umar", "Vina", "Wati", "Yoga", "Zaki",
+        "Agus", "Bayu", "Cici"
+    ],
+    "Unit": [
+        "Purwokerto Timur", "Purwokerto Timur", "Sokaraja", "Ajibarang", "Cilongok",
+        "⭐ Unit Anda", "⭐ Unit Anda", "⭐ Unit Anda",
+        "Banyumas", "Banyumas", "Wangon", "Wangon", "Kebasen", "Kebasen",
+        "Patikraja", "Patikraja", "Kemranjen", "Kemranjen", "Sumpiuh", "Sumpiuh",
+        "Jatilawang", "Jatilawang", "Rawalo", "Rawalo", "Baturraden", "Baturraden",
+        "Kalibagor"
+    ],
+    "Net Disburs (Juta)": [
+        950, 820, 760, 880, 650,
+        1050, 720, 510,
+        910, 700, 840, 690, 990, 610,
+        870, 730, 1020, 800, 640, 760,
+        930, 670, 790, 850, 1100, 580,
+        710
+    ],
+    "MOB": [
+        0.8, 1.2, 0.7, 0.5, 1.5,
+        0.9, 1.8, 2.1,
+        1.0, 1.6, 0.6, 1.3, 0.7, 1.9,
+        1.1, 0.9, 0.5, 1.0, 1.7, 1.2,
+        0.8, 1.4, 1.1, 0.6, 0.4, 2.0,
+        1.3
+    ],
 })
 
 mantri_data["Kuadran"] = mantri_data.apply(
@@ -161,22 +187,35 @@ mantri_data["Total Poin"] = mantri_data["Kuadran"].apply(get_mantri_poin_dari_ku
 mantri_data["Rank"] = mantri_data["Total Poin"].rank(method="min", ascending=False).astype(int)
 
 # ==========================
-# DATA PERFORMA UNIT
+# DATA PERFORMA UNIT (DUMMY - 15 UNIT)
 # ==========================
 
 unit_data = pd.DataFrame({
-    "Rank": [1, 2, 3, 4, 5],
     "Unit": [
-        "Purwokerto Timur",
-        "Sokaraja",
-        "Ajibarang",
-        "⭐ Unit Anda",
-        "Cilongok"
+        "Purwokerto Timur", "Sokaraja", "Ajibarang", "⭐ Unit Anda", "Cilongok",
+        "Banyumas", "Wangon", "Kebasen", "Patikraja", "Kemranjen",
+        "Sumpiuh", "Jatilawang", "Rawalo", "Baturraden", "Kalibagor"
     ],
-    "Growth OS (%)": [14, 16, 13, 11, 8],
-    "Quality Unit (%)": [8, 7, 6, 4, -1],
-    "Growth Kupedes (%)": [4.5, 5.2, 3.8, 2.1, 0.5],
-    "Rank Change": [2, 1, 3, 2, -1]
+    "Growth OS (%)": [
+        14, 16, 13, 12, 8,
+        12, 9, 15, 10, 17,
+        7, 11.5, 13.5, 18, 6
+    ],
+    "Quality Unit (%)": [
+        8, 7, 6, -1, -1,
+        2, -2, 5, -1.5, 3,
+        -3, 1, 4.5, -4, 6.5
+    ],
+    "Growth Kupedes (%)": [
+        4.5, 5.2, 3.8, 3.0, 0.5,
+        2.8, 1.2, 4.0, 0.8, 5.5,
+        -0.5, 2.4, 3.2, 6.1, -1.0
+    ],
+    "Rank Change": [
+        2, 1, 3, 2, -1,
+        0, -2, 4, 1, 3,
+        -3, 0, 2, 5, -4
+    ]
 })
 
 # Hitung Rata-rata Poin Mantri per Unit
@@ -210,9 +249,12 @@ unit_data["Poin Unit"] = (
 
 unit_data["Kategori"] = unit_data["Poin Unit"].apply(get_unit_category)
 
-# Sort berdasarkan Poin Unit
+# Sort berdasarkan Poin Unit -> tentukan Rank final (1..15)
 unit_data = unit_data.sort_values("Poin Unit", ascending=False).reset_index(drop=True)
 unit_data["Rank"] = range(1, len(unit_data) + 1)
+
+TOTAL_UNIT = len(unit_data)  # 15
+TOP_N = 10
 
 # ==========================
 # NAVIGASI
@@ -260,14 +302,15 @@ st.divider()
 # ==========================
 if st.session_state.page == "Overview":
     
-    # Ambil data unit anda (rank 4)
+    # Ambil data unit anda
     unit_anda = unit_data[unit_data["Unit"] == "⭐ Unit Anda"].iloc[0]
     top_unit = unit_data.iloc[0]
+    top10_data = unit_data.head(TOP_N)
     
     # KPI Cards
     k1, k2, k3, k4, k5 = st.columns(5)
     with k1:
-        st.metric("🏅 Ranking", f"#{int(unit_anda['Rank'])} / 23", f"+{int(unit_anda['Rank Change'])}")
+        st.metric("🏅 Ranking", f"#{int(unit_anda['Rank'])} / {TOTAL_UNIT}", f"+{int(unit_anda['Rank Change'])}")
     with k2:
         st.metric("💯 Performance", f"{unit_anda['Poin Unit']:.1f} Poin", f"/ 100")
     with k3:
@@ -277,29 +320,36 @@ if st.session_state.page == "Overview":
     with k5:
         st.metric("📈 Kategori", unit_anda['Kategori'])
 
+    if unit_anda['Rank'] <= TOP_N:
+        st.success(f"✅ Unit Anda berhasil masuk **Top {TOP_N}** dari {TOTAL_UNIT} unit! (Peringkat #{int(unit_anda['Rank'])})")
+    else:
+        gap_unit = unit_data.iloc[TOP_N - 1]
+        poin_kurang = gap_unit['Poin Unit'] - unit_anda['Poin Unit']
+        st.warning(f"⚠️ Unit Anda berada di peringkat #{int(unit_anda['Rank'])} dari {TOTAL_UNIT}. Dibutuhkan **+{poin_kurang:.1f} poin** lagi untuk masuk Top {TOP_N}.")
+
     st.divider()
 
-    # Section 1: Leaderboard Racing Unit vs Breakdown Poin
+    # Section 1: Leaderboard Top 10 Racing Unit vs Breakdown Poin
     c1, c2 = st.columns([2, 1])
 
     with c1:
-        st.subheader("🏅 Leaderboard Racing Unit (Berbasis Performance Point)")
+        st.subheader(f"🏅 Top {TOP_N} Racing Unit (Berbasis Performance Point)")
         
-        leaderboard_display = unit_data[["Rank", "Unit", "Poin Unit", "Kategori"]].copy()
+        leaderboard_display = top10_data[["Rank", "Unit", "Poin Unit", "Kategori"]].copy()
         leaderboard_display.columns = ["#", "Racing Unit", "Performance Poin", "Kategori"]
         leaderboard_display["#"] = leaderboard_display["#"].astype(int)
         leaderboard_display["Performance Poin"] = leaderboard_display["Performance Poin"].round(1)
         
         st.dataframe(leaderboard_display, use_container_width=True, hide_index=True)
         
-        # Visualisasi bar chart
+        # Visualisasi bar chart Top 10
         fig = px.bar(
-            unit_data.sort_values("Poin Unit"),
+            top10_data.sort_values("Poin Unit"),
             x="Poin Unit",
             y="Unit",
             orientation="h",
             text_auto=".1f",
-            title="Total Performance Point per Racing Unit"
+            title=f"Top {TOP_N} Performance Point per Racing Unit"
         )
         fig.update_traces(marker_color="#00529C")
         fig.update_layout(
@@ -339,10 +389,11 @@ if st.session_state.page == "Overview":
         )
         st.plotly_chart(fig_breakdown, use_container_width=True)
 
+        target_poin = unit_data.iloc[min(TOP_N, TOTAL_UNIT) - 1]["Poin Unit"]
         st.info(f"""
 **Total Poin Unit: {unit_anda['Poin Unit']:.1f} / 100**
 
-Target Top 3: +{max(0, 70 - unit_anda['Poin Unit']):.1f} poin
+Target Top {TOP_N}: +{max(0, target_poin - unit_anda['Poin Unit']):.1f} poin
         """)
 
     st.divider()
@@ -393,7 +444,7 @@ Target Top 3: +{max(0, 70 - unit_anda['Poin Unit']):.1f} poin
     st.info(f"""
 **📊 Insight Bulan Ini**
 
-- ✅ Unit Anda berada di peringkat {int(unit_anda['Rank'])} dari 23.
+- ✅ Unit Anda berada di peringkat {int(unit_anda['Rank'])} dari {TOTAL_UNIT}.
 - {'📈' if unit_anda['Rank Change'] > 0 else '📉'} Naik {abs(int(unit_anda['Rank Change']))} peringkat dibanding bulan lalu.
 - 🎯 Performance: {unit_anda['Poin Unit']:.1f} / 100 Poin ({unit_anda['Kategori']})
 - 💰 Growth OS: {unit_anda['Growth OS (%)']:.1f}% ({int(unit_anda['Poin Growth OS'])}/40 Poin)
@@ -408,9 +459,12 @@ Target Top 3: +{max(0, 70 - unit_anda['Poin Unit']):.1f} poin
 # ==========================
 elif st.session_state.page == "Leaderboard Racing Unit":
 
-    st.header("🏅 Leaderboard Racing Unit - Berbasis Performance Point")
+    st.header(f"🏅 Leaderboard Racing Unit - Top {TOP_N} dari {TOTAL_UNIT} Unit")
+
+    show_all = st.toggle(f"Tampilkan semua {TOTAL_UNIT} unit (default: Top {TOP_N})", value=False)
+    data_to_show = unit_data if show_all else unit_data.head(TOP_N)
     
-    display_df = unit_data[[
+    display_df = data_to_show[[
         "Rank", "Unit", "Growth OS (%)", "Quality Unit (%)", "Growth Kupedes (%)",
         "Poin Growth OS", "Poin Quality Unit", "Poin Kupedes",
         "Rata-rata Poin Mantri", "Poin Unit", "Kategori"
@@ -431,16 +485,16 @@ elif st.session_state.page == "Leaderboard Racing Unit":
     
     st.dataframe(display_df, use_container_width=True, hide_index=True)
 
-    # Chart Total Poin Unit
+    # Chart Total Poin Unit (Top 10)
     fig = px.bar(
-        unit_data.sort_values("Poin Unit"),
+        data_to_show.sort_values("Poin Unit"),
         x="Poin Unit",
         y="Unit",
         orientation="h",
         text_auto=".1f",
         color="Poin Unit",
         color_continuous_scale="Blues",
-        title="Total Performance Point per Racing Unit"
+        title=f"{'Seluruh' if show_all else f'Top {TOP_N}'} Performance Point per Racing Unit"
     )
     fig.update_layout(
         plot_bgcolor="white",
@@ -452,9 +506,9 @@ elif st.session_state.page == "Leaderboard Racing Unit":
     st.plotly_chart(fig, use_container_width=True)
 
     # Breakdown chart
-    st.subheader("📊 Rincian Komponen Poin Kinerja Unit")
+    st.subheader(f"📊 Rincian Komponen Poin Kinerja Unit ({'Seluruh Unit' if show_all else f'Top {TOP_N}'})")
     
-    breakdown_all = unit_data[[
+    breakdown_all = data_to_show[[
         "Unit", "Poin Growth OS", "Poin Quality Unit", "Poin Kupedes"
     ]].sort_values("Poin Growth OS", ascending=True)
     
@@ -476,7 +530,7 @@ elif st.session_state.page == "Leaderboard Racing Unit":
     # Kontribusi Mantri vs Kinerja Unit
     st.subheader("📈 Komposisi Poin Unit (70% Mantri + 30% Kinerja)")
     
-    composition_data = unit_data[[
+    composition_data = data_to_show[[
         "Unit", "Rata-rata Poin Mantri", "Poin Kinerja Normalized"
     ]].copy()
     composition_data["Kontribusi Mantri (70%)"] = (composition_data["Rata-rata Poin Mantri"] / 100) * 70
@@ -541,7 +595,7 @@ elif st.session_state.page == "Leaderboard Mantri":
         paper_bgcolor="white",
         xaxis=dict(range=[0, 100]),
         showlegend=False,
-        height=400
+        height=700
     )
     st.plotly_chart(fig, use_container_width=True)
 
@@ -570,7 +624,7 @@ elif st.session_state.page == "Leaderboard Mantri":
     fig_scatter.update_layout(
         plot_bgcolor="white",
         paper_bgcolor="white",
-        height=500,
+        height=550,
         xaxis_title="Net Disbursement (Juta)",
         yaxis_title="MOB (Month on Book)"
     )
@@ -671,7 +725,7 @@ Penilaian Mantri kini menggunakan **sistem 4 kuadran** berdasarkan dua dimensi u
         fig_quad.update_layout(
             plot_bgcolor="white",
             paper_bgcolor="white",
-            height=550,
+            height=600,
             xaxis_title="Net Disbursement per Bulan (Juta Rupiah)",
             yaxis_title="MOB (Month on Book)",
             annotations=annotations,
@@ -859,10 +913,10 @@ elif st.session_state.page == "Top Performer":
 
     st.header("🔥 Top Performer - Bulan Juni 2026")
 
-    # Top Racing Unit
-    st.subheader("🏆 Top Racing Unit")
+    # Top 10 Racing Unit
+    st.subheader(f"🏆 Top {TOP_N} Racing Unit")
     
-    top_unit_display = unit_data.head(3)[["Rank", "Unit", "Poin Unit", "Kategori"]].copy()
+    top_unit_display = unit_data.head(TOP_N)[["Rank", "Unit", "Poin Unit", "Kategori"]].copy()
     top_unit_display["Rank"] = top_unit_display["Rank"].astype(int)
     top_unit_display["Poin Unit"] = top_unit_display["Poin Unit"].round(1)
     top_unit_display.columns = ["#", "Racing Unit", "Performance Poin", "Kategori"]
@@ -908,6 +962,14 @@ elif st.session_state.page == "Top Performer":
 
 {top3['Kategori']}
         """)
+
+    # Tampilkan sisa unit Top 10 (rank 4-10) sebagai daftar ringkas
+    st.markdown(f"##### Peringkat 4 – {TOP_N}")
+    rest_top10 = unit_data.iloc[3:TOP_N]
+    cols_rest = st.columns(len(rest_top10)) if len(rest_top10) > 0 else []
+    for col, (_, row) in zip(cols_rest, rest_top10.iterrows()):
+        with col:
+            st.metric(f"#{int(row['Rank'])} {row['Unit']}", f"{row['Poin Unit']:.1f} Poin")
 
     st.divider()
 
