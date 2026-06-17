@@ -279,9 +279,6 @@ with st.sidebar:
         if st.button(label, use_container_width=True):
             st.session_state.page = value
 
-    st.divider()
-    st.info(f"Halaman Aktif:\n\n**{st.session_state.page}**")
-
 # ==========================
 # HEADER
 # ==========================
