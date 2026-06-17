@@ -65,15 +65,15 @@ def get_mantri_realisasi_poin(realisasi_pct):
 def get_mantri_quality_poin(quality_value):
     """Hitung poin Mantri berdasarkan perbaikan kualitas (Maks. 50 Poin)
     quality_value: nilai dari -10 hingga 10+ yang merepresentasikan perubahan kualitas
-    Skala terbalik: nilai negatif/kecil = poin lebih tinggi, nilai positif/besar = poin lebih rendah
+    Skala terbalik: nilai negatif kecil = poin lebih tinggi, nilai positif besar = poin lebih rendah
     """
-    if quality_value <= -8:
+    if quality_value <= -2:
         return 50
-    elif quality_value <= -5:
+    elif quality_value <= -1:
         return 40
-    elif quality_value <= -2:
+    elif quality_value <= 0:
         return 30
-    elif quality_value <= 2:
+    elif quality_value <= 1:
         return 15
     else:
         return 0
@@ -98,14 +98,15 @@ def get_unit_growth_os_poin(growth_os_pct):
 def get_unit_quality_poin(quality_value):
     """Hitung poin Unit berdasarkan perbaikan kualitas (Maks. 35 Poin)
     quality_value: nilai dari -10 hingga 10+ yang merepresentasikan kondisi kualitas
+    Skala terbalik: nilai negatif kecil = poin lebih tinggi, nilai positif besar = poin lebih rendah
     """
-    if quality_value >= 8:
+    if quality_value <= -2:
         return 35
-    elif quality_value >= 5:
+    elif quality_value <= -1:
         return 28
-    elif quality_value >= 2:
+    elif quality_value <= 0:
         return 20
-    elif quality_value >= -2:
+    elif quality_value <= 1:
         return 10
     else:
         return 0
@@ -585,7 +586,7 @@ elif st.session_state.page == "Breakdown Poin":
 
         st.markdown("### 2. Perbaikan Kualitas Portofolio (50 Poin)")
         quality_table = pd.DataFrame({
-            "Kondisi": ["Sangat Baik (≤ -8%)", "Baik (≤ -5%)", "Stabil (≤ -2%)", "Sedikit Memburuk (≤ 2%)", "Memburuk (> 2%)"],
+            "Kondisi": ["Sangat Baik (≤ -2%)", "Baik (≤ -1%)", "Stabil (≤ 0%)", "Sedikit Memburuk (≤ 1%)", "Memburuk (> 1%)"],
             "Poin": [50, 40, 30, 15, 0]
         })
         st.dataframe(quality_table, use_container_width=True, hide_index=True)
@@ -620,7 +621,7 @@ elif st.session_state.page == "Breakdown Poin":
 
         st.markdown("#### 2. Perbaikan Kualitas Unit (35 Poin)")
         unit_quality_table = pd.DataFrame({
-            "Kondisi Kualitas": ["Sangat Baik (≥ 8%)", "Baik (5% – 7,99%)", "Stabil (2% – 4,99%)", "Sedikit Memburuk (-2% – 1,99%)", "Memburuk (< -2%)"],
+            "Kondisi Kualitas": ["Sangat Baik (≤ -2%)", "Baik (≤ -1%)", "Stabil (≤ 0%)", "Sedikit Memburuk (≤ 1%)", "Memburuk (> 1%)"],
             "Poin": [35, 28, 20, 10, 0]
         })
         st.dataframe(unit_quality_table, use_container_width=True, hide_index=True)
