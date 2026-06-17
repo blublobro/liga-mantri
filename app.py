@@ -46,37 +46,42 @@ div[data-testid="stMetric"]{
 """, unsafe_allow_html=True)
 
 # ==========================
-# FUNGSI PERHITUNGAN POIN MANTRI
+# FUNGSI PERHITUNGAN POIN MANTRI (SISTEM KUADRAN)
 # ==========================
 
-def get_mantri_realisasi_poin(realisasi_pct):
-    """Hitung poin Mantri berdasarkan realisasi (Maks. 50 Poin)"""
-    if realisasi_pct >= 120:
-        return 50
-    elif realisasi_pct >= 110:
-        return 45
-    elif realisasi_pct >= 100:
-        return 40
-    elif realisasi_pct >= 90:
-        return 30
-    else:
-        return 15
+NET_DISBURS_THRESHOLD = 800  # juta
+MOB_THRESHOLD = 1
 
-def get_mantri_quality_poin(quality_value):
-    """Hitung poin Mantri berdasarkan perbaikan kualitas (Maks. 50 Poin)
-    quality_value: nilai dari -10 hingga 10+ yang merepresentasikan perubahan kualitas
-    Skala terbalik: nilai negatif kecil = poin lebih tinggi, nilai positif besar = poin lebih rendah
+def get_mantri_kuadran(net_disburs, mob):
     """
-    if quality_value <= -2:
-        return 50
-    elif quality_value <= -1:
-        return 40
-    elif quality_value <= 0:
-        return 30
-    elif quality_value <= 1:
-        return 15
+    Tentukan kuadran mantri:
+    Kuadran 1: Net Disburs > 800jt & MOB <= 1  → TERBAIK (Mantri Produktif)
+    Kuadran 2: Net Disburs > 800jt & MOB > 1
+    Kuadran 3: Net Disburs < 800jt & MOB <= 1
+    Kuadran 4: Net Disburs < 800jt & MOB > 1   → TERBURUK
+    """
+    if net_disburs >= NET_DISBURS_THRESHOLD and mob <= MOB_THRESHOLD:
+        return 1
+    elif net_disburs >= NET_DISBURS_THRESHOLD and mob > MOB_THRESHOLD:
+        return 2
+    elif net_disburs < NET_DISBURS_THRESHOLD and mob <= MOB_THRESHOLD:
+        return 3
     else:
-        return 0
+        return 4
+
+def get_mantri_poin_dari_kuadran(kuadran):
+    """Hitung total poin Mantri berdasarkan kuadran (Maks. 100 Poin)"""
+    poin_map = {1: 100, 2: 70, 3: 50, 4: 25}
+    return poin_map.get(kuadran, 25)
+
+def get_kuadran_label(kuadran):
+    label_map = {
+        1: "⭐ Kuadran 1 – Mantri Produktif",
+        2: "🟡 Kuadran 2 – Disburs Tinggi, MOB > 1",
+        3: "🟠 Kuadran 3 – Disburs Rendah, MOB Baik",
+        4: "🔴 Kuadran 4 – Perlu Perhatian",
+    }
+    return label_map.get(kuadran, "-")
 
 # ==========================
 # FUNGSI PERHITUNGAN POIN UNIT
@@ -144,16 +149,15 @@ def get_unit_category(poin_unit):
 mantri_data = pd.DataFrame({
     "Nama": ["Andi", "Budi", "Citra", "Dedi", "Eko", "Fitra", "Gita", "Hendra"],
     "Unit": ["Purwokerto Timur", "Purwokerto Timur", "Sokaraja", "Ajibarang", "Cilongok", "⭐ Unit Anda", "⭐ Unit Anda", "⭐ Unit Anda"],
-    "Realisasi (%)": [118, 110, 105, 98, 92, 115, 108, 100],
-    "Quality (%)": [9, 7, 6, 3, -1, 8, 5, 2]
+    "Net Disburs (Juta)": [950, 820, 760, 880, 650, 1050, 720, 510],
+    "MOB": [0.8, 1.2, 0.7, 0.5, 1.5, 0.9, 1.8, 2.1],
 })
 
-mantri_data["Poin Realisasi"] = mantri_data["Realisasi (%)"].apply(get_mantri_realisasi_poin)
-mantri_data["Poin Quality"] = mantri_data["Quality (%)"].apply(get_mantri_quality_poin)
-mantri_data["Total Poin"] = (
-    mantri_data["Poin Realisasi"] +
-    mantri_data["Poin Quality"]
+mantri_data["Kuadran"] = mantri_data.apply(
+    lambda r: get_mantri_kuadran(r["Net Disburs (Juta)"], r["MOB"]), axis=1
 )
+mantri_data["Label Kuadran"] = mantri_data["Kuadran"].apply(get_kuadran_label)
+mantri_data["Total Poin"] = mantri_data["Kuadran"].apply(get_mantri_poin_dari_kuadran)
 mantri_data["Rank"] = mantri_data["Total Poin"].rank(method="min", ascending=False).astype(int)
 
 # ==========================
@@ -375,10 +379,10 @@ Target Top 3: +{max(0, 70 - unit_anda['Poin Unit']):.1f} poin
         st.subheader("🔥 Top Performer (Mantri)")
         top_mantri_sorted = mantri_data.sort_values("Total Poin", ascending=False)
         
-        for idx, row in top_mantri_sorted.head(3).iterrows():
+        for i, (_, row) in enumerate(top_mantri_sorted.head(3).iterrows()):
             medals = ["🥇", "🥈", "🥉"]
             st.metric(
-                f"{medals[min(idx, 2)]} {row['Nama']}",
+                f"{medals[i]} {row['Nama']}",
                 f"{int(row['Total Poin'])} Poin",
                 f"({row['Unit']})"
             )
@@ -499,24 +503,22 @@ elif st.session_state.page == "Leaderboard Racing Unit":
 # ==========================
 elif st.session_state.page == "Leaderboard Mantri":
 
-    st.header("👨‍💼 Leaderboard Mantri - Berbasis Performance Point")
+    st.header("👨‍💼 Leaderboard Mantri - Berbasis Kuadran Produktivitas")
 
     display_mantri = mantri_data[[
-        "Nama", "Unit", "Realisasi (%)", "Quality (%)",
-        "Poin Realisasi", "Poin Quality", "Total Poin"
+        "Nama", "Unit", "Net Disburs (Juta)", "MOB",
+        "Label Kuadran", "Total Poin"
     ]].copy()
     
     display_mantri = display_mantri.sort_values("Total Poin", ascending=False)
     display_mantri.insert(0, "Rank", range(1, len(display_mantri) + 1))
     
     display_mantri["Rank"] = display_mantri["Rank"].astype(int)
-    display_mantri["Poin Realisasi"] = display_mantri["Poin Realisasi"].astype(int)
-    display_mantri["Poin Quality"] = display_mantri["Poin Quality"].astype(int)
     display_mantri["Total Poin"] = display_mantri["Total Poin"].astype(int)
     
     display_mantri.columns = [
-        "#", "Nama", "Unit", "Realisasi %", "Quality %",
-        "Poin Realisasi", "Poin Quality", "Total Poin"
+        "#", "Nama", "Unit", "Net Disburs (Juta)", "MOB",
+        "Kuadran", "Total Poin"
     ]
     
     st.dataframe(display_mantri, use_container_width=True, hide_index=True)
@@ -531,7 +533,7 @@ elif st.session_state.page == "Leaderboard Mantri":
         text="Total Poin",
         color="Total Poin",
         color_continuous_scale="Reds",
-        title="Total Performance Point per Mantri"
+        title="Total Performance Point per Mantri (Berbasis Kuadran)"
     )
     fig.update_traces(text=[f"{int(x)}" for x in mantri_sorted["Total Poin"]])
     fig.update_layout(
@@ -543,27 +545,36 @@ elif st.session_state.page == "Leaderboard Mantri":
     )
     st.plotly_chart(fig, use_container_width=True)
 
-    # Breakdown Mantri
-    st.subheader("📊 Breakdown Poin per Mantri")
-    
-    breakdown_mantri = mantri_data[[
-        "Nama", "Poin Realisasi", "Poin Quality"
-    ]].sort_values("Poin Realisasi")
-    
-    fig_breakdown_mantri = px.bar(
-        breakdown_mantri,
-        x=["Poin Realisasi", "Poin Quality"],
-        y="Nama",
-        orientation="h",
-        barmode="stack",
-        title="Breakdown Poin Mantri: Realisasi + Kualitas"
+    # Scatter Kuadran
+    st.subheader("📊 Posisi Kuadran Mantri")
+    kuadran_colors = {1: "#1a7f37", 2: "#e6b800", 3: "#e67300", 4: "#cc0000"}
+    mantri_data["Warna"] = mantri_data["Kuadran"].map(kuadran_colors)
+    fig_scatter = px.scatter(
+        mantri_data,
+        x="Net Disburs (Juta)",
+        y="MOB",
+        text="Nama",
+        color="Label Kuadran",
+        color_discrete_map={
+            "⭐ Kuadran 1 – Mantri Produktif": "#1a7f37",
+            "🟡 Kuadran 2 – Disburs Tinggi, MOB > 1": "#e6b800",
+            "🟠 Kuadran 3 – Disburs Rendah, MOB Baik": "#e67300",
+            "🔴 Kuadran 4 – Perlu Perhatian": "#cc0000",
+        },
+        title="Scatter Plot Kuadran Mantri (Net Disbursement vs MOB)",
+        size_max=20,
     )
-    fig_breakdown_mantri.update_layout(
+    fig_scatter.update_traces(marker=dict(size=18), textposition="top center")
+    fig_scatter.add_vline(x=NET_DISBURS_THRESHOLD, line_dash="dash", line_color="gray", annotation_text="800 Juta")
+    fig_scatter.add_hline(y=MOB_THRESHOLD, line_dash="dash", line_color="gray", annotation_text="MOB = 1")
+    fig_scatter.update_layout(
         plot_bgcolor="white",
         paper_bgcolor="white",
-        height=400
+        height=500,
+        xaxis_title="Net Disbursement (Juta)",
+        yaxis_title="MOB (Month on Book)"
     )
-    st.plotly_chart(fig_breakdown_mantri, use_container_width=True)
+    st.plotly_chart(fig_scatter, use_container_width=True)
 
 # ==========================
 # BREAKDOWN POIN
@@ -575,37 +586,137 @@ elif st.session_state.page == "Breakdown Poin":
     tab1, tab2, tab3 = st.tabs(["📋 Tabel Penilaian Mantri", "📊 Tabel Penilaian Unit", "🧮 Kalkulasi Detail"])
     
     with tab1:
-        st.subheader("👨‍💼 Penilaian Mantri (Total 100 Poin)")
-        
-        st.markdown("### 1. Realisasi Keseluruhan (50 Poin)")
-        realisasi_table = pd.DataFrame({
-            "Achievement Realisasi": ["≥ 120%", "110% – 119,99%", "100% – 109,99%", "90% – 99,99%", "< 90%"],
-            "Poin": [50, 45, 40, 30, 15]
-        })
-        st.dataframe(realisasi_table, use_container_width=True, hide_index=True)
+        st.subheader("👨‍💼 Penilaian Mantri – Sistem 4 Kuadran")
 
-        st.markdown("### 2. Perbaikan Kualitas Portofolio (50 Poin)")
-        quality_table = pd.DataFrame({
-            "Kondisi": ["Sangat Baik (≤ -2%)", "Baik (≤ -1%)", "Stabil (≤ 0%)", "Sedikit Memburuk (≤ 1%)", "Memburuk (> 1%)"],
-            "Poin": [50, 40, 30, 15, 0]
-        })
-        st.dataframe(quality_table, use_container_width=True, hide_index=True)
+        st.markdown("""
+Penilaian Mantri kini menggunakan **sistem 4 kuadran** berdasarkan dua dimensi utama:
+- **Net Disbursement per bulan** (threshold: Rp 800 juta)
+- **MOB (Month on Book)** (threshold: 1)
 
-        st.markdown("### 📊 Total Poin Mantri")
-        total_mantri_table = pd.DataFrame({
-            "Indikator": ["🚀 Realisasi Keseluruhan", "🛡️ Perbaikan Kualitas Portofolio"],
-            "Maksimum Poin": [50, 50],
-            "Tujuan": [
-                "Mendorong pencapaian target bisnis secara optimal.",
-                "Mendorong pengelolaan kredit yang sehat dan meminimalkan pembentukan kredit bermasalah."
+> Mantri terbaik adalah yang berada di **Kuadran 1**: Net Disbursement tinggi dan MOB rendah.
+        """)
+
+        # Tabel definisi kuadran
+        st.markdown("### 📋 Definisi 4 Kuadran Mantri")
+        kuadran_table = pd.DataFrame({
+            "Kuadran": [
+                "⭐ Kuadran 1 – Mantri Produktif",
+                "🟡 Kuadran 2 – Disburs Tinggi, MOB > 1",
+                "🟠 Kuadran 3 – Disburs Rendah, MOB Baik",
+                "🔴 Kuadran 4 – Perlu Perhatian"
+            ],
+            "Net Disburs / Bulan": ["> Rp 800 Juta", "> Rp 800 Juta", "< Rp 800 Juta", "< Rp 800 Juta"],
+            "MOB": ["≤ 1", "> 1", "≤ 1", "> 1"],
+            "Poin": [100, 70, 50, 25],
+            "Keterangan": [
+                "Produktivitas & kualitas terbaik",
+                "Produktif namun kualitas perlu dijaga",
+                "Kualitas baik namun produksi perlu ditingkatkan",
+                "Perlu pendampingan intensif"
             ]
         })
-        total_row_m = pd.DataFrame({
-            "Indikator": ["TOTAL"],
-            "Maksimum Poin": [100],
-            "Tujuan": [""]
+        st.dataframe(kuadran_table, use_container_width=True, hide_index=True)
+
+        st.divider()
+
+        # Grafik scatter kuadran
+        st.markdown("### 📊 Grafik Posisi Kuadran Mantri")
+
+        fig_quad = px.scatter(
+            mantri_data,
+            x="Net Disburs (Juta)",
+            y="MOB",
+            text="Nama",
+            color="Label Kuadran",
+            color_discrete_map={
+                "⭐ Kuadran 1 – Mantri Produktif": "#1a7f37",
+                "🟡 Kuadran 2 – Disburs Tinggi, MOB > 1": "#e6b800",
+                "🟠 Kuadran 3 – Disburs Rendah, MOB Baik": "#e67300",
+                "🔴 Kuadran 4 – Perlu Perhatian": "#cc0000",
+            },
+            title="Posisi Kuadran Mantri: Net Disbursement vs MOB",
+        )
+        fig_quad.update_traces(marker=dict(size=20), textposition="top center")
+        fig_quad.add_vline(
+            x=NET_DISBURS_THRESHOLD,
+            line_dash="dash", line_color="steelblue",
+            annotation_text="<b>800 Juta</b>", annotation_position="top left"
+        )
+        fig_quad.add_hline(
+            y=MOB_THRESHOLD,
+            line_dash="dash", line_color="steelblue",
+            annotation_text="<b>MOB = 1</b>", annotation_position="top right"
+        )
+
+        # Anotasi label kuadran di setiap pojok
+        x_max = mantri_data["Net Disburs (Juta)"].max() * 1.15
+        x_min = mantri_data["Net Disburs (Juta)"].min() * 0.85
+        y_max = mantri_data["MOB"].max() * 1.2
+        y_min = 0
+
+        annotations = [
+            dict(x=x_max, y=y_min + 0.05, text="⭐ Kuadran 1<br><b>Mantri Produktif</b>", showarrow=False,
+                 font=dict(color="#1a7f37", size=11), xanchor="right", yanchor="bottom",
+                 bgcolor="rgba(26,127,55,0.1)", bordercolor="#1a7f37", borderwidth=1),
+            dict(x=x_max, y=y_max, text="🟡 Kuadran 2<br>Disburs Tinggi, MOB > 1", showarrow=False,
+                 font=dict(color="#b38600", size=11), xanchor="right", yanchor="top",
+                 bgcolor="rgba(230,184,0,0.1)", bordercolor="#e6b800", borderwidth=1),
+            dict(x=x_min, y=y_min + 0.05, text="🟠 Kuadran 3<br>Disburs Rendah, MOB Baik", showarrow=False,
+                 font=dict(color="#b35000", size=11), xanchor="left", yanchor="bottom",
+                 bgcolor="rgba(230,115,0,0.1)", bordercolor="#e67300", borderwidth=1),
+            dict(x=x_min, y=y_max, text="🔴 Kuadran 4<br>Perlu Perhatian", showarrow=False,
+                 font=dict(color="#cc0000", size=11), xanchor="left", yanchor="top",
+                 bgcolor="rgba(204,0,0,0.1)", bordercolor="#cc0000", borderwidth=1),
+        ]
+        fig_quad.update_layout(
+            plot_bgcolor="white",
+            paper_bgcolor="white",
+            height=550,
+            xaxis_title="Net Disbursement per Bulan (Juta Rupiah)",
+            yaxis_title="MOB (Month on Book)",
+            annotations=annotations,
+            legend=dict(orientation="h", yanchor="bottom", y=-0.25, xanchor="center", x=0.5)
+        )
+        st.plotly_chart(fig_quad, use_container_width=True)
+
+        st.divider()
+
+        # Ringkasan distribusi kuadran
+        st.markdown("### 📈 Distribusi Mantri per Kuadran")
+        kuadran_counts = mantri_data.groupby("Label Kuadran").size().reset_index(name="Jumlah Mantri")
+        kuadran_counts["Poin"] = kuadran_counts["Label Kuadran"].map({
+            "⭐ Kuadran 1 – Mantri Produktif": 100,
+            "🟡 Kuadran 2 – Disburs Tinggi, MOB > 1": 70,
+            "🟠 Kuadran 3 – Disburs Rendah, MOB Baik": 50,
+            "🔴 Kuadran 4 – Perlu Perhatian": 25,
         })
-        st.dataframe(pd.concat([total_mantri_table, total_row_m], ignore_index=True), use_container_width=True, hide_index=True)
+        kuadran_counts = kuadran_counts.sort_values("Poin", ascending=False)
+        st.dataframe(kuadran_counts[["Label Kuadran", "Jumlah Mantri", "Poin"]], use_container_width=True, hide_index=True)
+
+        fig_dist = px.bar(
+            kuadran_counts.sort_values("Poin"),
+            x="Poin",
+            y="Label Kuadran",
+            orientation="h",
+            text="Jumlah Mantri",
+            color="Label Kuadran",
+            color_discrete_map={
+                "⭐ Kuadran 1 – Mantri Produktif": "#1a7f37",
+                "🟡 Kuadran 2 – Disburs Tinggi, MOB > 1": "#e6b800",
+                "🟠 Kuadran 3 – Disburs Rendah, MOB Baik": "#e67300",
+                "🔴 Kuadran 4 – Perlu Perhatian": "#cc0000",
+            },
+            title="Jumlah Mantri per Kuadran"
+        )
+        fig_dist.update_traces(texttemplate="%{text} mantri", textposition="outside")
+        fig_dist.update_layout(
+            plot_bgcolor="white",
+            paper_bgcolor="white",
+            showlegend=False,
+            xaxis=dict(range=[0, 115]),
+            height=300,
+        )
+        st.plotly_chart(fig_dist, use_container_width=True)
 
     with tab2:
         st.subheader("🏢 Penilaian Unit (Poin Kinerja Unit = 100 Poin)")
@@ -682,9 +793,9 @@ elif st.session_state.page == "Breakdown Poin":
             with col1:
                 for idx, row in mantri_unit_anda.iterrows():
                     st.markdown(f"**{row['Nama']}**")
-                    st.caption(f"Realisasi: {row['Realisasi (%)']:.1f}% → {int(row['Poin Realisasi'])}/50 poin")
-                    st.caption(f"Kualitas: {row['Quality (%)']:.1f}% → {int(row['Poin Quality'])}/50 poin")
-                    st.metric("Total", f"{int(row['Total Poin'])} poin")
+                    st.caption(f"Net Disburs: Rp {row['Net Disburs (Juta)']:.0f} Juta | MOB: {row['MOB']:.1f}")
+                    st.caption(f"Kuadran: {row['Label Kuadran']}")
+                    st.metric("Total Poin", f"{int(row['Total Poin'])} poin")
                     st.divider()
             
             with col2:
@@ -855,7 +966,7 @@ st.markdown(
     "<div style='background:#00529C;color:white;padding:10px;border-radius:10px;text-align:center'>"
     "<b>Racing Unit Dashboard</b><br>"
     "Performance Monitoring & Leaderboard (Point-Based System)<br>"
-    "<small>Mantri: Realisasi (50) + Kualitas (50) | Unit: (70% Mantri) + (30% Kinerja Unit: OS 40 + Kualitas 35 + Kupedes 25)</small>"
+    "<small>Mantri: Sistem 4 Kuadran (Net Disburs vs MOB) | Unit: (70% Mantri) + (30% Kinerja Unit: OS 40 + Kualitas 35 + Kupedes 25)</small>"
     "</div>",
     unsafe_allow_html=True
 )
