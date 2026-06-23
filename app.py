@@ -16,6 +16,30 @@ st.markdown("""
 .block-container{padding-top:1rem;padding-left:2rem;padding-right:2rem;}
 section[data-testid="stSidebar"]{background:linear-gradient(180deg,#00529C,#003B73);}
 section[data-testid="stSidebar"] *{color:white !important;}
+
+/* Fix warna teks & background selectbox di sidebar */
+section[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] > div {
+    background-color: rgba(255,255,255,0.12) !important;
+    border: 1px solid rgba(255,255,255,0.3) !important;
+    border-radius: 8px !important;
+}
+section[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] span,
+section[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] div,
+section[data-testid="stSidebar"] .stSelectbox [data-testid="stMarkdownContainer"] p {
+    color: white !important;
+}
+section[data-testid="stSidebar"] .stSelectbox svg {
+    fill: white !important;
+}
+/* Dropdown list yang muncul */
+[data-baseweb="popover"] ul li {
+    color: #1a1a2e !important;
+    background-color: white !important;
+}
+[data-baseweb="popover"] ul li:hover {
+    background-color: #e8f0fe !important;
+}
+
 .stButton>button{width:100%;border-radius:10px;background:transparent;color:white;border:none;text-align:left;font-weight:600;padding:8px 12px;}
 .stButton>button:hover{background:rgba(255,255,255,0.15);border-left:4px solid #F37021;}
 div[data-testid="stMetric"]{background:white;border-left:5px solid #00529C;padding:10px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.08);}
@@ -29,7 +53,7 @@ div[data-testid="stMetric"]{background:white;border-left:5px solid #00529C;paddi
 .komponen-card{background:white;border-radius:10px;padding:14px;box-shadow:0 2px 6px rgba(0,0,0,.07);margin-bottom:8px;cursor:help;}
 .komponen-card:hover{box-shadow:0 4px 12px rgba(0,82,156,.18);border-left:4px solid #00529C;}
 .progress-bar-wrap{background:#e9ecef;border-radius:8px;height:16px;margin-top:4px;}
-.progress-bar-fill{height:16px;border-radius:8px;transition:width 0.4s;}
+.progress-bar-fill{height:16px;border-radius:8px;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -240,7 +264,6 @@ with st.sidebar:
             ("🏅 Top 20 Penerima Hadiah", "Top 20 Penerima Hadiah"),
             ("🗺️ Breakdown Wilayah", "Breakdown Wilayah"),
             ("🔴 Early Warning", "Early Warning"),
-            ("📈 KPI Balanced", "KPI Balanced"),
         ]
         for label, val in kanpus_menus:
             if st.button(label, use_container_width=True):
@@ -280,17 +303,6 @@ with h3:
     st.metric("Total Agent", f"{N} Agent")
 
 st.divider()
-
-# ==========================
-# HELPER: progress bar HTML
-# ==========================
-def progress_bar(pct, color="#00529C"):
-    w = min(100, max(0, pct))
-    return f"""
-    <div class='progress-bar-wrap'>
-      <div class='progress-bar-fill' style='width:{w}%;background:{color};'></div>
-    </div>
-    """
 
 def color_for_pct(pct):
     if pct >= 80: return "#198754"
@@ -455,17 +467,21 @@ if st.session_state.view == "agent":
             kontribusi = round(info["bobot_float"] * raw_val, 1)
             pct_display = round(raw_val, 1)
             bar_color = color_for_pct(pct_display)
+            bar_width = min(100, max(0, pct_display))
+            card_html = (
+                f"<div class='komponen-card' title='{info['penjelasan']}'>"
+                f"<div style='font-size:22px;text-align:center'>{info['icon']}</div>"
+                f"<div style='font-size:11px;font-weight:bold;text-align:center;color:#00529C;margin-top:4px'>{info['label']}</div>"
+                f"<div style='font-size:10px;color:gray;text-align:center'>Bobot {info['bobot']}</div>"
+                f"<div style='font-size:18px;font-weight:bold;text-align:center;color:{bar_color};margin:6px 0'>{pct_display:.0f}/100</div>"
+                f"<div class='progress-bar-wrap'>"
+                f"<div class='progress-bar-fill' style='width:{bar_width}%;background:{bar_color};'></div>"
+                f"</div>"
+                f"<div style='font-size:10px;color:#555;text-align:center;margin-top:4px'>+{kontribusi:.1f} poin</div>"
+                f"</div>"
+            )
             with col:
-                st.markdown(f"""
-<div class='komponen-card' title="{info['penjelasan']}">
-  <div style='font-size:22px;text-align:center'>{info['icon']}</div>
-  <div style='font-size:11px;font-weight:bold;text-align:center;color:#00529C;margin-top:4px'>{info['label']}</div>
-  <div style='font-size:10px;color:gray;text-align:center'>Bobot {info['bobot']}</div>
-  <div style='font-size:18px;font-weight:bold;text-align:center;color:{bar_color};margin:6px 0'>{pct_display:.0f}%</div>
-  {progress_bar(pct_display, bar_color)}
-  <div style='font-size:10px;color:#555;text-align:center;margin-top:4px'>Kontribusi: +{kontribusi:.1f} poin</div>
-</div>
-""", unsafe_allow_html=True)
+                st.markdown(card_html, unsafe_allow_html=True)
 
         # Expandable detail per komponen
         st.markdown("##### 💡 Detail & Tips Tiap Komponen (klik untuk buka):")
@@ -922,85 +938,7 @@ else:
                 if count > 0:
                     st.warning(f"**{seg}** ({count} agent): {action}")
 
-    # ---- KPI BALANCED ----
-    elif st.session_state.page == "KPI Balanced":
-        st.subheader(f"📈 KPI Balanced Scorecard MELESAT – {periode_selected}{wil_badge}")
 
-        total_vol = df_view["Sales Volume (Rp)"].sum()
-        total_trx = df_view["Jumlah Transaksi"].sum()
-        total_fee = df_view["Fee Income (Rp)"].sum()
-        n_view = len(df_view)
-        active_agent = (df_view["Status"] != "🔴 Merah").sum()
-        avg_rev_per_agent = total_fee / max(n_view, 1)
-
-        tab1, tab2, tab3, tab4 = st.tabs(["💰 Financial", "👥 Customer", "⚙️ Operational", "🛡️ Risk"])
-
-        with tab1:
-            st.markdown("### 💰 Financial Perspective")
-            f1,f2,f3 = st.columns(3)
-            with f1: st.metric("Total Fee Based Income", f"Rp {total_fee/1e9:.3f} M")
-            with f2: st.metric("Revenue per Agent (Avg)", f"Rp {avg_rev_per_agent/1e6:.2f} Jt")
-            with f3: st.metric("Cost per Transaction (Est.)", "Rp 2.500")
-            group_col = "Unit" if kanpus_wil != "Semua" else "Wilayah"
-            fig_f = px.bar(
-                df_view.groupby(group_col)["Fee Income (Rp)"].sum().reset_index().assign(**{"Fee (Jt)": lambda d: d["Fee Income (Rp)"]/1e6}),
-                x=group_col, y="Fee (Jt)", text_auto=".1f", color="Fee (Jt)",
-                color_continuous_scale="Blues", title=f"Fee Income per {group_col} (Juta Rp)"
-            )
-            fig_f.update_layout(plot_bgcolor="white", paper_bgcolor="white", height=350)
-            st.plotly_chart(fig_f, use_container_width=True)
-
-        with tab2:
-            st.markdown("### 👥 Customer Perspective")
-            c1,c2,c3 = st.columns(3)
-            with c1: st.metric("Total Fee Income", f"Rp {total_fee/1e6:.1f} Jt")
-            with c2: st.metric("Avg Transaksi / Agent", f"{total_trx//max(n_view,1)}")
-            with c3: st.metric("Repeat Trx Rate (Est.)", "68.4%")
-            fig_c = px.scatter(
-                df_view, x="Produk Digunakan", y="Fee Income (Rp)",
-                color="Status", size="Jumlah Transaksi",
-                color_discrete_map={"🟢 Hijau":"#198754","🟡 Kuning":"#ffc107","🔴 Merah":"#dc3545"},
-                hover_data=["Nama Agent","Wilayah"],
-                title="Korelasi Produk Digunakan vs Fee Income"
-            )
-            fig_c.update_layout(plot_bgcolor="white", paper_bgcolor="white", height=400)
-            st.plotly_chart(fig_c, use_container_width=True)
-
-        with tab3:
-            st.markdown("### ⚙️ Operational Perspective")
-            o1,o2,o3 = st.columns(3)
-            with o1: st.metric("Active Agent Ratio", f"{active_agent/max(n_view,1)*100:.1f}%", f"{active_agent}/{n_view}")
-            with o2: st.metric("Avg Trx / Active Agent", f"{total_trx//max(active_agent,1)} Trx")
-            with o3: st.metric("Avg Produk / Agent", f"{df_view['Produk Digunakan'].mean():.1f}")
-
-            prod_dist = df_view["Produk Digunakan"].value_counts().reset_index()
-            prod_dist.columns = ["Jumlah Produk","Jumlah Agent"]
-            fig_o = px.bar(prod_dist.sort_values("Jumlah Produk"),
-                           x="Jumlah Produk", y="Jumlah Agent", text_auto="d",
-                           color="Jumlah Produk", color_continuous_scale="Purples",
-                           title="Distribusi Jumlah Produk per Agent")
-            fig_o.update_layout(plot_bgcolor="white", paper_bgcolor="white", height=350)
-            st.plotly_chart(fig_o, use_container_width=True)
-
-        with tab4:
-            st.markdown("### 🛡️ Risk Perspective")
-            r1,r2,r3 = st.columns(3)
-            merah_v = len(merah_view)
-            with r1: st.metric("Agent Merah (Risiko Tinggi)", f"{merah_v}", f"{merah_v/max(n_view,1)*100:.1f}%")
-            with r2: st.metric("Fraud Rate (Est.)", "0.12%")
-            with r3: st.metric("Failed Trx Rate (Est.)", "1.8%")
-
-            fig_r = px.scatter(
-                df_view, x="MELESAT Score", y="Health Score",
-                color="Status", size="Sales Volume (Rp)",
-                color_discrete_map={"🟢 Hijau":"#198754","🟡 Kuning":"#ffc107","🔴 Merah":"#dc3545"},
-                hover_data=["Nama Agent","Wilayah"],
-                title="Risk Matrix: MELESAT Score vs Health Score"
-            )
-            fig_r.add_hline(y=40, line_dash="dash", line_color="red", annotation_text="Threshold Merah (40)")
-            fig_r.add_hline(y=65, line_dash="dash", line_color="green", annotation_text="Threshold Hijau (65)")
-            fig_r.update_layout(plot_bgcolor="white", paper_bgcolor="white", height=420)
-            st.plotly_chart(fig_r, use_container_width=True)
 
 # ==========================
 # FOOTER
